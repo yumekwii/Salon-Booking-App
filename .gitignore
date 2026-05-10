@@ -15,9 +15,14 @@ devtools_options.yaml
 # Firebase (kung may secrets)
 # firebase.json   ← uncomment kung gusto mong itago
 
+# Firebase - SECRET!
+google-services.json
+GoogleService-Info.plist
+
 # OS
 .DS_Store
 Thumbs.db
 
 # Pub
 # pubspec.lock  ← leave commented para sa apps
+
