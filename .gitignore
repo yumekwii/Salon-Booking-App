@@ -18,6 +18,7 @@ devtools_options.yaml
 # Firebase - SECRET!
 google-services.json
 GoogleService-Info.plist
+lib/firebase_options.dart
 
 # OS
 .DS_Store
