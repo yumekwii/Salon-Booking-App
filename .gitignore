@@ -1,0 +1,23 @@
+# Flutter/Dart
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+devtools_options.yaml
+
+# Firebase (kung may secrets)
+# firebase.json   ← uncomment kung gusto mong itago
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Pub
+# pubspec.lock  ← leave commented para sa apps
