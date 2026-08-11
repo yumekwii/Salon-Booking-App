@@ -887,7 +887,7 @@ class _BaseServicePageState extends State<BaseServicePage> {
                           elevation: 2,
                         ),
                         child: const Text(
-                          'Add to Checkout',
+                          'Add Service',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
