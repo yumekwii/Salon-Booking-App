@@ -1,29 +1,55 @@
-# Flutter/Dart
+# Flutter / Dart
 build/
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .metadata
+.pub-cache/
+.pub/
 
-# IDE
+# IDE & Editors
 .idea/
 *.iml
 *.iws
 *.ipr
 devtools_options.yaml
+.vscode/*
+!.vscode/launch.json
 
-# Firebase (kung may secrets)
-# firebase.json   ← uncomment kung gusto mong itago
-
-# Firebase - SECRET!
-google-services.json
-GoogleService-Info.plist
+# --- DELIKADO & SECRETS (HUWAG I-PUSH) ---
+*.env
+.env*
 lib/firebase_options.dart
+**/google-services.json
+**/GoogleService-Info.plist
+android/local.properties
+android/key.properties
+*.keystore
+*.jks
+*.p12
 
-# OS
+# Firebase Tools
+# firebase.json # Leave commented unless you want to ignore firebase CLI configs
+
+# Android specific
+android/.gradle/
+android/app/debug/
+android/app/profile/
+android/app/release/
+
+# iOS / macOS specific
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Generated.xcconfig
+ios/Flutter/app.flt
+ios/DerivedData/
+*.xcworkspace
+
+# OS / System
 .DS_Store
 Thumbs.db
 
-# Pub
-# pubspec.lock  ← leave commented para sa apps
-
+# Pub Lockfile
+# pubspec.lock # Leave commented for apps so dependencies stay locked across environments
