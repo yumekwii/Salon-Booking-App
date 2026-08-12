@@ -16,10 +16,13 @@ import 'pages/service_selection_page.dart';
 import 'theme/app_theme.dart';
 import 'theme/app_typography.dart';
 import 'pages/app_intro_page.dart';
+import 'widgets/mobile_app_shell.dart';
 
 class _SalonMark extends StatelessWidget {
   final double size;
-  const _SalonMark({this.size = 30});
+  final bool showName;
+
+  const _SalonMark({this.size = 30, this.showName = true});
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +47,7 @@ class _SalonMark extends StatelessWidget {
       ),
     );
 
+    if (!showName) return logo;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -62,6 +66,13 @@ class _SalonMark extends StatelessWidget {
       ],
     );
   }
+}
+
+class _SalonHeaderTitle extends StatelessWidget {
+  const _SalonHeaderTitle();
+
+  @override
+  Widget build(BuildContext context) => const _SalonMark(size: 30);
 }
 
 void main() async {
@@ -84,7 +95,7 @@ class SalonApp extends StatelessWidget {
       builder: (context, child) {
         return ChangeNotifierProvider<ServiceSelectionProvider>(
           create: (_) => ServiceSelectionProvider(allSalonServices),
-          child: child!,
+          child: MobileAppShell(child: child!),
         );
       },
       home: const AppIntroPage(nextPage: AuthWrapper()),
