@@ -33,6 +33,39 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+  <div id="mobile-frame">
+    <div id="flutter-target"></div>
+  </div>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #1a1a1a;
+    }
+    #mobile-frame {
+      display: flex;
+      justify-content: center;
+      height: 100%;
+    }
+    #flutter-target {
+      width: 100%;
+      max-width: 430px;
+      height: 100%;
+      background: #fff;
+      box-shadow: 0 0 40px rgba(0,0,0,0.4);
+    }
+  </style>
+  <script>
+    window.addEventListener('load', function() {
+      _flutter.loader.load({
+        onEntrypointLoaded: async function(engineInitializer) {
+          const appRunner = await engineInitializer.initializeEngine({
+            hostElement: document.querySelector('#flutter-target')
+          });
+          appRunner.runApp();
+        }
+      });
+    });
+  </script>
 </body>
 </html>
