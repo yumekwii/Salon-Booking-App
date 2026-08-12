@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';  // ✅ ADD THIS
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'services/auth_service.dart';
 import 'services/booking_service.dart';
@@ -12,6 +12,7 @@ import 'services/scheduling_service.dart';
 import 'providers/scheduling_provider.dart';
 import 'pages/staff_scheduling_page.dart';
 import 'pages/my_appointments_page.dart';
+import 'pages/service_selection_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -2689,73 +2690,56 @@ class _MainPageState extends State<MainPage> {
 class HaircutServicesPage extends StatelessWidget {
   const HaircutServicesPage({super.key});
 
+  static final List<SalonService> _services = [
+    SalonService(id: 'haircut_layered_cut', name: 'Layered Cut', durationMinutes: 45, price: 800, imageUrl: 'assets/images/haircuts/layered-cut.jpg'),
+    SalonService(id: 'haircut_bob_cut', name: 'Bob Cut', durationMinutes: 40, price: 700, imageUrl: 'assets/images/haircuts/bob-cut.jpg'),
+    SalonService(id: 'haircut_curtain_bangs', name: 'Curtain Bangs', durationMinutes: 35, price: 700, imageUrl: 'assets/images/haircuts/curtain-bangs.jpg'),
+    SalonService(id: 'haircut_feather_cut', name: 'Feather Cut', durationMinutes: 45, price: 850, imageUrl: 'assets/images/haircuts/feather-cut.jpg'),
+    SalonService(id: 'haircut_wolf_cut', name: 'Wolf Cut', durationMinutes: 50, price: 1000, imageUrl: 'assets/images/haircuts/wolf-cut.jpg'),
+    SalonService(id: 'haircut_fade_cut', name: 'Fade Cut', durationMinutes: 35, price: 450, imageUrl: 'assets/images/haircuts/fade-cut.jpg'),
+    SalonService(id: 'haircut_undercut', name: 'Undercut', durationMinutes: 30, price: 400, imageUrl: 'assets/images/haircuts/undercut.jpg'),
+    SalonService(id: 'haircut_crew_cut', name: 'Crew Cut', durationMinutes: 25, price: 350, imageUrl: 'assets/images/haircuts/crew-cut.jpg'),
+    SalonService(id: 'haircut_pompadour', name: 'Pompadour', durationMinutes: 40, price: 500, imageUrl: 'assets/images/haircuts/pompadour.jpg'),
+    SalonService(id: 'haircut_taper_cut', name: 'Taper Cut', durationMinutes: 30, price: 400, imageUrl: 'assets/images/haircuts/taper-cut.jpg'),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return const BaseServicePage(
-      title: 'Haircut',
-      services: [
-        {
-          'name': 'Layered Cut',
-          'duration': '45 MINUTES',
-          'price': 800,
-          'imageUrl': 'assets/images/haircuts/layered-cut.jpg'
-        },
-        {
-          'name': 'Bob Cut',
-          'duration': '40 MINUTES',
-          'price': 700,
-          'imageUrl': 'assets/images/haircuts/bob-cut.jpg'
-        },
-        {
-          'name': 'Curtain Bangs',
-          'duration': '35 MINUTES',
-          'price': 700,
-          'imageUrl': 'assets/images/haircuts/curtain-bangs.jpg'
-        },
-        {
-          'name': 'Feather Cut',
-          'duration': '45 MINUTES',
-          'price': 850,
-          'imageUrl': 'assets/images/haircuts/feather-cut.jpg'
-        },
-        {
-          'name': 'Wolf Cut',
-          'duration': '50 MINUTES',
-          'price': 1000,
-          'imageUrl': 'assets/images/haircuts/wolf-cut.jpg'
-        },
-        {
-          'name': 'Fade Cut',
-          'duration': '35 MINUTES',
-          'price': 450,
-          'imageUrl': 'assets/images/haircuts/fade-cut.jpg'
-        },
-        {
-          'name': 'Undercut',
-          'duration': '30 MINUTES',
-          'price': 400,
-          'imageUrl': 'assets/images/haircuts/undercut.jpg'
-        },
-        {
-          'name': 'Crew Cut',
-          'duration': '25 MINUTES',
-          'price': 350,
-          'imageUrl': 'assets/images/haircuts/crew-cut.jpg'
-        },
-        {
-          'name': 'Pompadour',
-          'duration': '40 MINUTES',
-          'price': 500,
-          'imageUrl': 'assets/images/haircuts/pompadour.jpg'
-        },
-        {
-          'name': 'Taper Cut',
-          'duration': '30 MINUTES',
-          'price': 400,
-          'imageUrl': 'assets/images/haircuts/taper-cut.jpg'
-        },
-      ],
-      iconData: Icons.face,
+    return ServiceSelectionPage(
+      categoryTitle: 'Haircut',
+      services: _services,
+      onContinue: (context, selected, totalDuration, totalPrice) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChangeNotifierProvider(
+              create: (_) => SchedulingProvider(),
+              child: StaffSchedulingPage(
+                totalDurationMinutes: totalDuration,
+                onScheduleConfirmed: (staffId, startTime) {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PaymentPage(
+                        totalAmount: totalPrice.toInt(),
+                        services: selected.map((s) => {
+                          'name': s.name,
+                          'duration': s.formattedDuration,
+                          'price': s.price.toInt().toString(),
+                          'category': 'Haircut',
+                        }).toList(),
+                        scheduledStaffId: staffId,
+                        scheduledStartTime: startTime,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -2763,67 +2747,55 @@ class HaircutServicesPage extends StatelessWidget {
 class HairServicesPage extends StatelessWidget {
   const HairServicesPage({super.key});
 
+  static final List<SalonService> _services = [
+    SalonService(id: 'treat_keratin', name: 'Keratin Treatment', durationMinutes: 120, price: 2000, imageUrl: 'assets/images/treatments/keratin-treatment.jpg'),
+    SalonService(id: 'treat_brazilian', name: 'Brazilian Blowout', durationMinutes: 150, price: 2500, imageUrl: 'assets/images/treatments/brazilian-blowout.jpg'),
+    SalonService(id: 'treat_rebonding', name: 'Hair Rebonding', durationMinutes: 180, price: 2800, imageUrl: 'assets/images/treatments/hair-rebonding.jpg'),
+    SalonService(id: 'treat_spa', name: 'Hair Spa / Deep Conditioning', durationMinutes: 60, price: 700, imageUrl: 'assets/images/treatments/hair-spa.jpg'),
+    SalonService(id: 'treat_hot_oil', name: 'Hot Oil Treatment', durationMinutes: 45, price: 500, imageUrl: 'assets/images/treatments/hot-oil-treatment.jpg'),
+    SalonService(id: 'treat_botox', name: 'Hair Botox / Bond Repair', durationMinutes: 120, price: 2200, imageUrl: 'assets/images/treatments/hair-botox.jpg'),
+    SalonService(id: 'treat_scalp', name: 'Scalp Detox / Scalp Treatment', durationMinutes: 45, price: 600, imageUrl: 'assets/images/treatments/scalp-detox.jpg'),
+    SalonService(id: 'treat_olaplex', name: 'Olaplex / Smartbond Treatment', durationMinutes: 90, price: 1800, imageUrl: 'assets/images/treatments/smart-bond.jpg'),
+    SalonService(id: 'treat_color_protect', name: 'Color Protect Treatment', durationMinutes: 60, price: 1000, imageUrl: 'assets/images/treatments/color-protect.jpg'),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return const BaseServicePage(
-      title: 'Hair Treatment',
-      services: [
-        {
-          'name': 'Keratin Treatment',
-          'duration': '120 MINUTES',
-          'price': 2000,
-          'imageUrl': 'assets/images/treatments/keratin-treatment.jpg'
-        },
-        {
-          'name': 'Brazilian Blowout',
-          'duration': '150 MINUTES',
-          'price': 2500,
-          'imageUrl': 'assets/images/treatments/brazilian-blowout.jpg'
-        },
-        {
-          'name': 'Hair Rebonding',
-          'duration': '180 MINUTES',
-          'price': 2800,
-          'imageUrl': 'assets/images/treatments/hair-rebonding.jpg'
-        },
-        {
-          'name': 'Hair Spa / Deep Conditioning',
-          'duration': '60 MINUTES',
-          'price': 700,
-          'imageUrl': 'assets/images/treatments/hair-spa.jpg'
-        },
-        {
-          'name': 'Hot Oil Treatment',
-          'duration': '45 MINUTES',
-          'price': 500,
-          'imageUrl': 'assets/images/treatments/hot-oil-treatment.jpg'
-        },
-        {
-          'name': 'Hair Botox / Bond Repair',
-          'duration': '120 MINUTES',
-          'price': 2200,
-          'imageUrl': 'assets/images/treatments/hair-botox.jpg'
-        },
-        {
-          'name': 'Scalp Detox / Scalp Treatment',
-          'duration': '45 MINUTES',
-          'price': 600,
-          'imageUrl': 'assets/images/treatments/scalp-detox.jpg'
-        },
-        {
-          'name': 'Olaplex / Smartbond Treatment',
-          'duration': '90 MINUTES',
-          'price': 1800,
-          'imageUrl': 'assets/images/treatments/smart-bond.jpg'
-        },
-        {
-          'name': 'Color Protect Treatment',
-          'duration': '60 MINUTES',
-          'price': 1000,
-          'imageUrl': 'assets/images/treatments/color-protect.jpg'
-        },
-      ],
-      iconData: Icons.face_retouching_natural,
+    return ServiceSelectionPage(
+      categoryTitle: 'Hair Treatment',
+      services: _services,
+      onContinue: (context, selected, totalDuration, totalPrice) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChangeNotifierProvider(
+              create: (_) => SchedulingProvider(),
+              child: StaffSchedulingPage(
+                totalDurationMinutes: totalDuration,
+                onScheduleConfirmed: (staffId, startTime) {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PaymentPage(
+                        totalAmount: totalPrice.toInt(),
+                        services: selected.map((s) => {
+                          'name': s.name,
+                          'duration': s.formattedDuration,
+                          'price': s.price.toInt().toString(),
+                          'category': 'Hair Treatment',
+                        }).toList(),
+                        scheduledStaffId: staffId,
+                        scheduledStartTime: startTime,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -2831,67 +2803,55 @@ class HairServicesPage extends StatelessWidget {
 class HairColorPage extends StatelessWidget {
   const HairColorPage({super.key});
 
+  static final List<SalonService> _services = [
+    SalonService(id: 'color_ash_brown', name: 'Ash Brown', durationMinutes: 90, price: 2000, imageUrl: 'assets/images/colors/ash-brown.jpg'),
+    SalonService(id: 'color_balayage', name: 'Balayage', durationMinutes: 150, price: 2500, imageUrl: 'assets/images/colors/balayage.jpg'),
+    SalonService(id: 'color_ombre', name: 'Ombre', durationMinutes: 120, price: 2200, imageUrl: 'assets/images/colors/ombre.jpg'),
+    SalonService(id: 'color_blonde', name: 'Blonde', durationMinutes: 120, price: 2000, imageUrl: 'assets/images/colors/blonde.jpg'),
+    SalonService(id: 'color_rose_gold', name: 'Rose Gold', durationMinutes: 120, price: 2400, imageUrl: 'assets/images/colors/rose-gold.jpg'),
+    SalonService(id: 'color_burgundy', name: 'Burgundy', durationMinutes: 90, price: 1800, imageUrl: 'assets/images/colors/burgundy.jpg'),
+    SalonService(id: 'color_jet_black', name: 'Jet Black', durationMinutes: 60, price: 1200, imageUrl: 'assets/images/colors/jet-black.jpg'),
+    SalonService(id: 'color_silver', name: 'Silver', durationMinutes: 120, price: 2400, imageUrl: 'assets/images/colors/silver.jpg'),
+    SalonService(id: 'color_violet', name: 'Violet', durationMinutes: 120, price: 2200, imageUrl: 'assets/images/colors/violet.jpg'),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return const BaseServicePage(
-      title: 'Hair Color',
-      services: [
-        {
-          'name': 'Ash Brown',
-          'duration': '90 MINUTES',
-          'price': 2000,
-          'imageUrl': 'assets/images/colors/ash-brown.jpg'
-        },
-        {
-          'name': 'Balayage',
-          'duration': '150 MINUTES',
-          'price': 2500,
-          'imageUrl': 'assets/images/colors/balayage.jpg'
-        },
-        {
-          'name': 'Ombre',
-          'duration': '120 MINUTES',
-          'price': 2200,
-          'imageUrl': 'assets/images/colors/ombre.jpg'
-        },
-        {
-          'name': 'Blonde',
-          'duration': '120 MINUTES',
-          'price': 2000,
-          'imageUrl': 'assets/images/colors/blonde.jpg'
-        },
-        {
-          'name': 'Rose Gold',
-          'duration': '120 MINUTES',
-          'price': 2400,
-          'imageUrl': 'assets/images/colors/rose-gold.jpg'
-        },
-        {
-          'name': 'Burgundy',
-          'duration': '90 MINUTES',
-          'price': 1800,
-          'imageUrl': 'assets/images/colors/burgundy.jpg'
-        },
-        {
-          'name': 'Jet Black',
-          'duration': '60 MINUTES',
-          'price': 1200,
-          'imageUrl': 'assets/images/colors/jet-black.jpg'
-        },
-        {
-          'name': 'Silver',
-          'duration': '120 MINUTES',
-          'price': 2400,
-          'imageUrl': 'assets/images/colors/silver.jpg'
-        },
-        {
-          'name': 'Violet',
-          'duration': '120 MINUTES',
-          'price': 2200,
-          'imageUrl': 'assets/images/colors/violet.jpg'
-        },
-      ],
-      iconData: Icons.color_lens,
+    return ServiceSelectionPage(
+      categoryTitle: 'Hair Color',
+      services: _services,
+      onContinue: (context, selected, totalDuration, totalPrice) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChangeNotifierProvider(
+              create: (_) => SchedulingProvider(),
+              child: StaffSchedulingPage(
+                totalDurationMinutes: totalDuration,
+                onScheduleConfirmed: (staffId, startTime) {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PaymentPage(
+                        totalAmount: totalPrice.toInt(),
+                        services: selected.map((s) => {
+                          'name': s.name,
+                          'duration': s.formattedDuration,
+                          'price': s.price.toInt().toString(),
+                          'category': 'Hair Color',
+                        }).toList(),
+                        scheduledStaffId: staffId,
+                        scheduledStartTime: startTime,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
