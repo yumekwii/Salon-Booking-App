@@ -16,13 +16,10 @@ import 'pages/service_selection_page.dart';
 import 'theme/app_theme.dart';
 import 'theme/app_typography.dart';
 import 'pages/app_intro_page.dart';
-import 'widgets/mobile_app_shell.dart';
 
 class _SalonMark extends StatelessWidget {
   final double size;
-  final bool showName;
-
-  const _SalonMark({this.size = 30, this.showName = true});
+  const _SalonMark({this.size = 30});
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +44,6 @@ class _SalonMark extends StatelessWidget {
       ),
     );
 
-    if (!showName) return logo;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -68,13 +64,6 @@ class _SalonMark extends StatelessWidget {
   }
 }
 
-class _SalonHeaderTitle extends StatelessWidget {
-  const _SalonHeaderTitle();
-
-  @override
-  Widget build(BuildContext context) => const _SalonMark(size: 30);
-}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -93,9 +82,32 @@ class SalonApp extends StatelessWidget {
       theme: buildSalonTheme(),
       debugShowCheckedModeBanner: false,
       builder: (context, child) {
-        return ChangeNotifierProvider<ServiceSelectionProvider>(
-          create: (_) => ServiceSelectionProvider(allSalonServices),
-          child: MobileAppShell(child: child!),
+        final screenWidth = MediaQuery.sizeOf(context).width;
+
+        return ColoredBox(
+          color: const Color(0xFF121212),
+          child: Center(
+            child: SizedBox(
+              width: screenWidth > 430 ? 430 : screenWidth,
+              height: double.infinity,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.50),
+                      blurRadius: 30,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                ),
+                child: ChangeNotifierProvider<ServiceSelectionProvider>(
+                  create: (_) => ServiceSelectionProvider(allSalonServices),
+                  child: child!,
+                ),
+              ),
+            ),
+          ),
         );
       },
       home: const AppIntroPage(nextPage: AuthWrapper()),

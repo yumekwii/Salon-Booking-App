@@ -39,10 +39,7 @@ _flutter.buildConfig = {"engineRevision":"035316565ad77281a75305515e4682e6c4c6f7
 
 _flutter.loader.load({
   onEntrypointLoaded: async function(engineInitializer) {
-    const appRunner = await engineInitializer.initializeEngine({
-      hostElement: document.querySelector('#flutter-target')
-    });
-
+    const appRunner = await engineInitializer.initializeEngine();
     await appRunner.runApp();
   }
 });
