@@ -1,84 +1,104 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+
 import '../models/scheduling_models.dart';
 import '../services/scheduling_service.dart';
 
 class SchedulingProvider extends ChangeNotifier {
-  final SchedulingService _service = SchedulingService();
-  
-  // ============================================================================
-  // STATE VARIABLES
-  // ============================================================================
-  DateTime _selectedDate = DateTime.now();
+  SchedulingProvider({SchedulingService? service})
+      : _service = service ?? SchedulingService();
+
+  final SchedulingService _service;
+
   List<Appointment> _appointments = [];
-  String? _selectedStaffId;
-  TimeSlot? _selectedSlot;
-  int _serviceDurationMinutes = 60; // Default 1 hour
-  
-  // ============================================================================
-  // GETTERS (Para ma-access sa UI)
-  // ============================================================================
-  DateTime get selectedDate => _selectedDate;
-  List<Appointment> get appointments => _appointments;
-  String? get selectedStaffId => _selectedStaffId;
-  TimeSlot? get selectedSlot => _selectedSlot;
+  int _serviceDurationMinutes = 60;
+  StreamSubscription<List<Appointment>>? _appointmentsSubscription;
+
+  bool _disposed = false;
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  List<Appointment> get appointments => List.unmodifiable(_appointments);
   int get serviceDurationMinutes => _serviceDurationMinutes;
   SchedulingService get service => _service;
-  
-  // ============================================================================
-  // SET SELECTED DATE
-  // ============================================================================
-  void setSelectedDate(DateTime date) {
-    _selectedDate = date;
-    // Clear selection when date changes
-    _selectedStaffId = null;
-    _selectedSlot = null;
-    notifyListeners(); // Notify UI to rebuild
-  }
-  
-  // ============================================================================
-  // SET SERVICE DURATION (from checkout total duration)
-  // ============================================================================
+  bool get isLoading => _isLoading;
+  bool get hasError => _errorMessage != null;
+  String? get errorMessage => _errorMessage;
+
   void setServiceDuration(int minutes) {
+    if (_disposed || minutes <= 0 || minutes == _serviceDurationMinutes) {
+      return;
+    }
+
     _serviceDurationMinutes = minutes;
     notifyListeners();
   }
-  
-  // ============================================================================
-  // UPDATE APPOINTMENTS (from Firestore stream)
-  // ============================================================================
-  void updateAppointments(List<Appointment> appointments) {
-    _appointments = appointments;
+
+  Future<void> loadAppointments(DateTime date) async {
+    if (_disposed) return;
+
+    await _appointmentsSubscription?.cancel();
+    if (_disposed) return;
+
+    _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
+
+    try {
+      final user = await _service.waitForAuthenticatedUser();
+      if (user == null) {
+        _isLoading = false;
+        _errorMessage = 'You must be signed in to load the schedule.';
+        notifyListeners();
+        return;
+      }
+
+      _appointmentsSubscription = _service
+          .getAppointmentsStream(date)
+          .listen(
+            (appointments) {
+              if (_disposed) return;
+
+              _appointments = List<Appointment>.from(appointments);
+              _isLoading = false;
+              _errorMessage = null;
+              notifyListeners();
+            },
+            onError: (Object error, StackTrace stackTrace) {
+              if (_disposed) return;
+
+              debugPrint('SchedulingProvider stream error: $error');
+              debugPrint('Firebase project: ${_service.projectId}');
+              debugPrintStack(stackTrace: stackTrace);
+
+              _isLoading = false;
+              _errorMessage = _service.userFacingError(error);
+              notifyListeners();
+            },
+          );
+    } catch (error, stackTrace) {
+      if (_disposed) return;
+
+      debugPrint('SchedulingProvider load error: $error');
+      debugPrint('Firebase project: ${_service.projectId}');
+      debugPrintStack(stackTrace: stackTrace);
+
+      _isLoading = false;
+      _errorMessage = _service.userFacingError(error);
+      notifyListeners();
+    }
   }
-  
-  // ============================================================================
-  // SELECT A TIMESLOT
-  // ============================================================================
-  void selectSlot(String staffId, TimeSlot slot) {
-    _selectedStaffId = staffId;
-    _selectedSlot = slot;
-    notifyListeners();
-  }
-  
-  // ============================================================================
-  // CLEAR SELECTION
-  // ============================================================================
-  void clearSelection() {
-    _selectedStaffId = null;
-    _selectedSlot = null;
+
+  void clearError() {
+    if (_disposed || _errorMessage == null) return;
+    _errorMessage = null;
     notifyListeners();
   }
 
-  void loadAppointments(DateTime date) {
-  service.getAppointmentsStream(date).listen((appointments) {
-    updateAppointments(appointments);
-  });
-}
-  
-  // ============================================================================
-  // CHECK IF SLOT IS AVAILABLE (wrapper for service method)
-  // ============================================================================
   bool isSlotAvailable(String staffId, TimeSlot slot) {
+    if (_disposed || _isLoading || hasError) return false;
+
     return _service.isSlotAvailable(
       staffId: staffId,
       slotStart: slot.dateTime,
@@ -86,28 +106,13 @@ class SchedulingProvider extends ChangeNotifier {
       existingAppointments: _appointments,
     );
   }
-  
-  // ============================================================================
-  // FIND NEXT AVAILABLE SLOT (wrapper for service method)
-  // ============================================================================
-  DateTime? findNextAvailable(String staffId) {
-    return _service.findNextAvailableSlot(
-      staffId: staffId,
-      fromTime: DateTime.now(),
-      durationMinutes: _serviceDurationMinutes,
-      existingAppointments: _appointments,
-    );
-  }
-  
-  // ============================================================================
-  // GET STAFF NAME BY ID
-  // ============================================================================
-  String getStaffName(String staffId) {
-    try {
-      return _service.staff.firstWhere((s) => s.id == staffId).name;
-    } catch (e) {
-      return 'Unknown Staff';
-    }
-  }
 
+  @override
+  void dispose() {
+    _disposed = true;
+    final subscription = _appointmentsSubscription;
+    _appointmentsSubscription = null;
+    subscription?.cancel();
+    super.dispose();
+  }
 }

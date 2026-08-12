@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -18,12 +19,27 @@ class BookingService {
     return value.toInt();
   }
 
-  int _calculateTotalDuration(List<Map<String, String>> services) {
-    int total = 0;
-    for (var service in services) {
-      total += _parseDuration(service['duration'] ?? '30 MINUTES');
-    }
-    return total;
+  int _calculateTotalDuration(List<Map<String, String>> services) =>
+      services.fold<int>(
+        0,
+        (total, service) => total + _parseDuration(service['duration'] ?? '30 MINUTES'),
+      );
+
+  List<Map<String, String>> _normalizeServices(
+    List<Map<String, String>> services,
+  ) =>
+      services
+          .map((service) => {
+                'category': service['category'] ?? '',
+                'name': service['name'] ?? '',
+                'duration': service['duration'] ?? '',
+                'price': service['price'] ?? '0',
+              })
+          .toList();
+
+  Future<Map<String, dynamic>?> _getCurrentUserData(User user) async {
+    final snapshot = await _firestore.collection('users').doc(user.uid).get();
+    return snapshot.data();
   }
 
   // ✅ NEW: Create booking WITH schedule link
@@ -40,22 +56,25 @@ class BookingService {
         return 'User not logged in';
       }
 
-      final totalDuration = _calculateTotalDuration(services);
-      final userDoc = await _firestore.collection('users').doc(user.uid).get();
-      final userData = userDoc.data();
+      final normalizedServices = _normalizeServices(services);
+      final totalDuration = _calculateTotalDuration(normalizedServices);
+      final userData = await _getCurrentUserData(user);
 
-      // ✅ STEP 1: Create booking document
-      final bookingRef = await _firestore.collection('bookings').add({
+      final bookingRef = _firestore.collection('bookings').doc();
+      final appointmentRef = _firestore.collection('appointments').doc();
+      final endTime = scheduledStartTime.add(Duration(minutes: totalDuration));
+
+      // Keep booking + appointment atomic: either both documents are created
+      // or neither is written. This prevents orphaned bookings when the second
+      // Firestore write fails.
+      final batch = _firestore.batch();
+
+      batch.set(bookingRef, {
         'userId': user.uid,
         'userEmail': user.email ?? '',
         'userName': '${userData?['firstName'] ?? ''} ${userData?['lastName'] ?? ''}'.trim(),
         'userContact': userData?['contact'] ?? 'N/A',
-        'services': services.map((service) => {
-          'category': service['category'] ?? '',
-          'name': service['name'] ?? '',
-          'duration': service['duration'] ?? '',
-          'price': service['price'] ?? '0',
-        }).toList(),
+        'services': normalizedServices,
         'totalAmount': totalAmount,
         'totalDuration': totalDuration,
         'paymentMethod': paymentMethod,
@@ -65,9 +84,7 @@ class BookingService {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      // ✅ STEP 2: Create appointment WITH bookingId link
-      final endTime = scheduledStartTime.add(Duration(minutes: totalDuration));
-      await _firestore.collection('appointments').add({
+      batch.set(appointmentRef, {
         'bookingId': bookingRef.id,
         'staffId': staffId,
         'startTime': Timestamp.fromDate(scheduledStartTime),
@@ -78,9 +95,10 @@ class BookingService {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
+      await batch.commit();
       return null;
     } catch (e) {
-      print('Error creating booking: $e');
+      debugPrint('Error creating booking: $e');
       return 'Failed to create booking: ${e.toString()}';
     }
   }
@@ -97,21 +115,16 @@ class BookingService {
         return 'User not logged in';
       }
 
-      final totalDuration = _calculateTotalDuration(services);
-      final userDoc = await _firestore.collection('users').doc(user.uid).get();
-      final userData = userDoc.data();
+      final normalizedServices = _normalizeServices(services);
+      final totalDuration = _calculateTotalDuration(normalizedServices);
+      final userData = await _getCurrentUserData(user);
 
       await _firestore.collection('bookings').add({
         'userId': user.uid,
         'userEmail': user.email ?? '',
         'userName': '${userData?['firstName'] ?? ''} ${userData?['lastName'] ?? ''}'.trim(),
         'userContact': userData?['contact'] ?? 'N/A',
-        'services': services.map((service) => {
-          'category': service['category'] ?? '',
-          'name': service['name'] ?? '',
-          'duration': service['duration'] ?? '',
-          'price': service['price'] ?? '0',
-        }).toList(),
+        'services': normalizedServices,
         'totalAmount': totalAmount,
         'totalDuration': totalDuration,
         'paymentMethod': paymentMethod,

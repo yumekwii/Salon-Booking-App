@@ -13,6 +13,56 @@ import 'providers/scheduling_provider.dart';
 import 'pages/staff_scheduling_page.dart';
 import 'pages/my_appointments_page.dart';
 import 'pages/service_selection_page.dart';
+import 'theme/app_theme.dart';
+import 'theme/app_typography.dart';
+import 'pages/app_intro_page.dart';
+
+class _SalonMark extends StatelessWidget {
+  final double size;
+  const _SalonMark({this.size = 30});
+
+  @override
+  Widget build(BuildContext context) {
+    final logo = ClipRRect(
+      borderRadius: BorderRadius.circular(size * 0.28),
+      child: Image.asset(
+        'assets/images/favicon.png',
+        width: size,
+        height: size,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(size * 0.28),
+            ),
+            child: Icon(Icons.spa_rounded, color: AppColors.primary, size: size * 0.62),
+          );
+        },
+      ),
+    );
+
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        logo,
+        const SizedBox(width: 10),
+        Text(
+          'SALON',
+          style: AppTypography.brand.copyWith(
+            fontSize: size * 0.78,
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.7,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,15 +79,56 @@ class SalonApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Salon Booking',
-      theme: ThemeData(
-        primarySwatch: Colors.brown,
-        scaffoldBackgroundColor: const Color(0xFFFFF8DC),
-      ),
+      theme: buildSalonTheme(),
       debugShowCheckedModeBanner: false,
-      home: const AuthWrapper(),
+      builder: (context, child) {
+        return ChangeNotifierProvider<ServiceSelectionProvider>(
+          create: (_) => ServiceSelectionProvider(allSalonServices),
+          child: child!,
+        );
+      },
+      home: const AppIntroPage(nextPage: AuthWrapper()),
     );
   }
 }
+
+// One combined catalog, each service tagged with the correct category.
+// Put this near the top of main.dart, outside any class.
+final List<SalonService> allSalonServices = [
+  // --- Haircut ---
+  SalonService(id: 'haircut_layered_cut', name: 'Layered Cut', durationMinutes: 45, price: 800, imageUrl: 'assets/images/haircuts/layered-cut.jpg', category: 'Haircut'),
+  SalonService(id: 'haircut_bob_cut', name: 'Bob Cut', durationMinutes: 40, price: 700, imageUrl: 'assets/images/haircuts/bob-cut.jpg', category: 'Haircut'),
+  SalonService(id: 'haircut_curtain_bangs', name: 'Curtain Bangs', durationMinutes: 35, price: 700, imageUrl: 'assets/images/haircuts/curtain-bangs.jpg', category: 'Haircut'),
+  SalonService(id: 'haircut_feather_cut', name: 'Feather Cut', durationMinutes: 45, price: 850, imageUrl: 'assets/images/haircuts/feather-cut.jpg', category: 'Haircut'),
+  SalonService(id: 'haircut_wolf_cut', name: 'Wolf Cut', durationMinutes: 50, price: 1000, imageUrl: 'assets/images/haircuts/wolf-cut.jpg', category: 'Haircut'),
+  SalonService(id: 'haircut_fade_cut', name: 'Fade Cut', durationMinutes: 35, price: 450, imageUrl: 'assets/images/haircuts/fade-cut.jpg', category: 'Haircut'),
+  SalonService(id: 'haircut_undercut', name: 'Undercut', durationMinutes: 30, price: 400, imageUrl: 'assets/images/haircuts/undercut.jpg', category: 'Haircut'),
+  SalonService(id: 'haircut_crew_cut', name: 'Crew Cut', durationMinutes: 25, price: 350, imageUrl: 'assets/images/haircuts/crew-cut.jpg', category: 'Haircut'),
+  SalonService(id: 'haircut_pompadour', name: 'Pompadour', durationMinutes: 40, price: 500, imageUrl: 'assets/images/haircuts/pompadour.jpg', category: 'Haircut'),
+  SalonService(id: 'haircut_taper_cut', name: 'Taper Cut', durationMinutes: 30, price: 400, imageUrl: 'assets/images/haircuts/taper-cut.jpg', category: 'Haircut'),
+
+  // --- Hair Treatment ---
+  SalonService(id: 'treat_keratin', name: 'Keratin Treatment', durationMinutes: 120, price: 2000, imageUrl: 'assets/images/treatments/keratin-treatment.jpg', category: 'Hair Treatment'),
+  SalonService(id: 'treat_brazilian', name: 'Brazilian Blowout', durationMinutes: 150, price: 2500, imageUrl: 'assets/images/treatments/brazilian-blowout.jpg', category: 'Hair Treatment'),
+  SalonService(id: 'treat_rebonding', name: 'Hair Rebonding', durationMinutes: 180, price: 2800, imageUrl: 'assets/images/treatments/hair-rebonding.jpg', category: 'Hair Treatment'),
+  SalonService(id: 'treat_spa', name: 'Hair Spa / Deep Conditioning', durationMinutes: 60, price: 700, imageUrl: 'assets/images/treatments/hair-spa.jpg', category: 'Hair Treatment'),
+  SalonService(id: 'treat_hot_oil', name: 'Hot Oil Treatment', durationMinutes: 45, price: 500, imageUrl: 'assets/images/treatments/hot-oil-treatment.jpg', category: 'Hair Treatment'),
+  SalonService(id: 'treat_botox', name: 'Hair Botox / Bond Repair', durationMinutes: 120, price: 2200, imageUrl: 'assets/images/treatments/hair-botox.jpg', category: 'Hair Treatment'),
+  SalonService(id: 'treat_scalp', name: 'Scalp Detox / Scalp Treatment', durationMinutes: 45, price: 600, imageUrl: 'assets/images/treatments/scalp-detox.jpg', category: 'Hair Treatment'),
+  SalonService(id: 'treat_olaplex', name: 'Olaplex / Smartbond Treatment', durationMinutes: 90, price: 1800, imageUrl: 'assets/images/treatments/smart-bond.jpg', category: 'Hair Treatment'),
+  SalonService(id: 'treat_color_protect', name: 'Color Protect Treatment', durationMinutes: 60, price: 1000, imageUrl: 'assets/images/treatments/color-protect.jpg', category: 'Hair Treatment'),
+
+  // --- Hair Color ---
+  SalonService(id: 'color_ash_brown', name: 'Ash Brown', durationMinutes: 90, price: 2000, imageUrl: 'assets/images/colors/ash-brown.jpg', category: 'Hair Color'),
+  SalonService(id: 'color_balayage', name: 'Balayage', durationMinutes: 150, price: 2500, imageUrl: 'assets/images/colors/balayage.jpg', category: 'Hair Color'),
+  SalonService(id: 'color_ombre', name: 'Ombre', durationMinutes: 120, price: 2200, imageUrl: 'assets/images/colors/ombre.jpg', category: 'Hair Color'),
+  SalonService(id: 'color_blonde', name: 'Blonde', durationMinutes: 120, price: 2000, imageUrl: 'assets/images/colors/blonde.jpg', category: 'Hair Color'),
+  SalonService(id: 'color_rose_gold', name: 'Rose Gold', durationMinutes: 120, price: 2400, imageUrl: 'assets/images/colors/rose-gold.jpg', category: 'Hair Color'),
+  SalonService(id: 'color_burgundy', name: 'Burgundy', durationMinutes: 90, price: 1800, imageUrl: 'assets/images/colors/burgundy.jpg', category: 'Hair Color'),
+  SalonService(id: 'color_jet_black', name: 'Jet Black', durationMinutes: 60, price: 1200, imageUrl: 'assets/images/colors/jet-black.jpg', category: 'Hair Color'),
+  SalonService(id: 'color_silver', name: 'Silver', durationMinutes: 120, price: 2400, imageUrl: 'assets/images/colors/silver.jpg', category: 'Hair Color'),
+  SalonService(id: 'color_violet', name: 'Violet', durationMinutes: 120, price: 2200, imageUrl: 'assets/images/colors/violet.jpg', category: 'Hair Color'),
+];
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
@@ -49,10 +140,10 @@ class AuthWrapper extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            backgroundColor: Color(0xFFFFF8DC),
+            backgroundColor: AppColors.background,
             body: Center(
               child: CircularProgressIndicator(
-                color: Color(0xFF8B0000),
+                color: AppColors.primary,
               ),
             ),
           );
@@ -108,1119 +199,13 @@ class CheckoutManager {
   int get count => _selectedServices.length;
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
 
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _slideAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-
-    _slideAnimation = Tween<double>(
-      begin: 100.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
-
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (mounted) {
-        _animationController.forward();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFBEB5A8),
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        toolbarHeight: 70,
-        titleSpacing: 20,
-        title: const Text(
-          'SALON',
-          style: TextStyle(
-            color: Color(0xFF8B0000),
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Georgia',
-          ),
-        ),
-      ),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              Expanded(
-                child: Container(
-                  color: const Color(0xFFBEB5A8),
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 10),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const GuestServicePage(
-                                    title: 'Haircut',
-                                    services: [
-                                      {'name': 'Classic Fade', 'duration': '30 MINUTES'},
-                                      {'name': 'Undercut', 'duration': '35 MINUTES'},
-                                      {'name': 'Pompadour', 'duration': '40 MINUTES'},
-                                    ],
-                                    iconData: Icons.face,
-                                  ),
-                                ),
-                              );
-                            },
-                            child: const ServiceCard(
-                              title: 'Haircut',
-                              imageUrl: 'assets/images/cards/haircut-card.jpg',
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const GuestServicePage(
-                                    title: 'Hair Treatment',
-                                    services: [
-                                      {'name': 'Keratin Treatment', 'duration': '120 MINUTES'},
-                                      {'name': 'Brazilian Blowout', 'duration': '150 MINUTES'},
-                                    ],
-                                    iconData: Icons.face_retouching_natural,
-                                  ),
-                                ),
-                              );
-                            },
-                            child: const ServiceCard(
-                              title: 'Hair Treatment',
-                              imageUrl: 'assets/images/cards/treatment-card.jpg',
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const GuestServicePage(
-                                    title: 'Hair Color',
-                                    services: [
-                                      {'name': 'Balayage', 'duration': '150 MINUTES'},
-                                      {'name': 'Ombre', 'duration': '120 MINUTES'},
-                                    ],
-                                    iconData: Icons.color_lens,
-                                  ),
-                                ),
-                              );
-                            },
-                            child: const ServiceCard(
-                              title: 'Hair Color',
-                              imageUrl: 'assets/images/cards/color-card.jpg',
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          
-          // Bottom Welcome Container - Slide Up Only
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: AnimatedBuilder(
-              animation: _animationController,
-              builder: (context, child) {
-                return Transform.translate(
-                  offset: Offset(0, _slideAnimation.value),
-                  child: Container(
-                    width: double.infinity,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(25),
-                        topRight: Radius.circular(25),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text(
-                            'Welcome to Our Salon',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF8B0000),
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Sign up or log in to book your appointment',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[600],
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 20),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: SizedBox(
-                                  height: 48,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => const SignUpPage()),
-                                      );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF8B0000),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      elevation: 2,
-                                    ),
-                                    child: const Text(
-                                      'Sign Up',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: SizedBox(
-                                  height: 48,
-                                  child: OutlinedButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => const LoginPage()),
-                                      );
-                                    },
-                                    style: OutlinedButton.styleFrom(
-                                      side: const BorderSide(color: Color(0xFF8B0000), width: 2),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      backgroundColor: Colors.white,
-                                    ),
-                                    child: const Text(
-                                      'Log In',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF8B0000),
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ServiceCard extends StatelessWidget {
-  final String title;
-  final String? imageUrl;
-
-  const ServiceCard({
-    super.key, 
-    required this.title,
-    this.imageUrl,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 180,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(76),
-            blurRadius: 8,
-            offset: const Offset(4, 4),
-          ),
-        ],
-        border: Border.all(color: Colors.black, width: 3),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child: Stack(
-          children: [
-            if (imageUrl != null)
-              Positioned.fill(
-                child: Image.asset(
-                  imageUrl!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xFFE8D5C4), Color(0xFFF5E6D3)],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              )
-            else
-              Positioned.fill(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFFE8D5C4), Color(0xFFF5E6D3)],
-                    ),
-                  ),
-                ),
-              ),
-            if (imageUrl != null)
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withAlpha(26),
-                  ),
-                ),
-              ),
-            Align(
-              alignment: Alignment.bottomLeft,
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black87,
-                        offset: Offset(2, 2),
-                        blurRadius: 5,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class GuestServicePage extends StatelessWidget {
-  final String title;
-  final List<Map<String, String>> services;
-  final IconData iconData;
-
-  const GuestServicePage({
-    super.key,
-    required this.title,
-    required this.services,
-    required this.iconData,
-  });
-
-  void _showLoginDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black87.withAlpha(178),
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFD3CBBB),
-                  Color(0xFFE8DCC8),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(76),
-                  blurRadius: 20,
-                  spreadRadius: 5,
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Join Us Today!',
-                    style: TextStyle(
-                      color: Color(0xFF8B0000),
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Log in or sign up to book services,\nview appointments, and unlock\nexclusive salon perks!',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 16,
-                      height: 1.5,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 32),
-                  Container(
-                    width: double.infinity,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF8B0000), Color(0xFFB71C1C)],
-                      ),
-                      borderRadius: BorderRadius.circular(28),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF8B0000).withAlpha(102),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const LoginPage()),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.login, size: 22, color: Colors.white),
-                          SizedBox(width: 10),
-                          Text(
-                            'Log In',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SignUpPage()),
-                        );
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFF8B0000), width: 2.5),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                        backgroundColor: Colors.white,
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.person_add, size: 22, color: Color(0xFF8B0000)),
-                          SizedBox(width: 10),
-                          Text(
-                            'Sign Up for Free',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF8B0000),
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text(
-                      'Maybe later',
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 15,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFB5ADA1),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFB5ADA1),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      body: Container(
-        color: const Color(0xFFE8DCC8),
-        child: Padding(
-          padding: const EdgeInsets.only(left: 15, right: 15, top: 15, bottom: 30),
-          child: GridView.builder(
-            physics: const BouncingScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              childAspectRatio: 0.82,
-            ),
-            itemCount: services.length,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () => _showLoginDialog(context),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(25),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                          ),
-                          child: Center(
-                            child: Icon(iconData, size: 40, color: Colors.grey[400]),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                services[index]['name']!,
-                                style: const TextStyle(
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                'Duration: ${services[index]['duration']!}',
-                                style: TextStyle(fontSize: 7.5, color: Colors.grey[600]),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class BaseServicePage extends StatefulWidget {
-  final String title;
-  final List<Map<String, dynamic>> services;
-  final IconData iconData;
-
-  const BaseServicePage({
-    super.key,
-    required this.title,
-    required this.services,
-    required this.iconData,
-  });
-
-  @override
-  State<BaseServicePage> createState() => _BaseServicePageState();
-}
-
-class _BaseServicePageState extends State<BaseServicePage> {
-  final CheckoutManager _checkoutManager = CheckoutManager();
-  String _tempImageUrl = '';
-
-  void _showServiceConfirmation(String name, String duration, String price) {
-    final service = widget.services.firstWhere(
-      (s) => s['name'].toString() == name,
-      orElse: () => <String, dynamic>{},
-    );
-    final imageUrl = service['imageUrl']?.toString() ?? '';
-
-    showDialog(
-      context: context,
-      barrierColor: Colors.black54,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: const Color(0xFFD3CBBB),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(25.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 140,
-                  height: 140,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(40),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
-                    child: imageUrl != null && imageUrl.isNotEmpty
-                        ? Image.asset(
-                            imageUrl,
-                            width: double.infinity,
-                            height: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Center(
-                                child: Icon(
-                                  widget.iconData,
-                                  size: 60,
-                                  color: const Color(0xFF8B0000),
-                                ),
-                              );
-                            },
-                          )
-                        : Center(
-                            child: Icon(
-                              widget.iconData,
-                              size: 60,
-                              color: const Color(0xFF8B0000),
-                            ),
-                          ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  name,
-                  style: const TextStyle(
-                    color: Color(0xFF8B0000),
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 15),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.access_time, size: 20, color: Colors.black54),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        duration,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black87,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.payments, size: 20, color: Colors.black54),
-                    const SizedBox(width: 8),
-                    Text(
-                      '₱$price',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF8B0000),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
-                Column(
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          _handleAddService(name, duration, price);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF8B0000),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          elevation: 2,
-                        ),
-                        child: const Text(
-                          'Add Service',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0xFF8B0000), width: 2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                        ),
-                        child: const Text(
-                          'Cancel',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF8B0000),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _handleAddService(String name, String duration, String price) {
-    final hasCategory = _checkoutManager.hasCategoryService(widget.title);
-    
-    if (hasCategory) {
-      final existingService = _checkoutManager.getServiceFromCategory(widget.title);
-      
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            backgroundColor: const Color(0xFFD3CBBB),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            title: const Text(
-              'Replace Service?',
-              style: TextStyle(
-                color: Color(0xFF8B0000),
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            content: Text(
-              'You already selected "$existingService".\n\nDo you want to replace it with "$name"?',
-              style: const TextStyle(fontSize: 15),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  setState(() {
-                    final index = _checkoutManager.selectedServices
-                        .indexWhere((s) => s['category'] == widget.title);
-                    if (index != -1) {
-                      _checkoutManager.removeService(index);
-                    }
-                    _checkoutManager.addService({
-                      'name': name,
-                      'duration': duration,
-                      'price': price,
-                      'category': widget.title,
-                    });
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8B0000),
-                ),
-                child: const Text(
-                  'Replace',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          );
-        },
-      );
-    } else {
-      setState(() {
-        _checkoutManager.addService({
-          'name': name,
-          'duration': duration,
-          'price': price,
-          'category': widget.title,
-        });
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFB5ADA1),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFB5ADA1),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          widget.title,
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      body: Stack(
-        children: [
-          Container(
-            color: const Color(0xFFE8DCC8),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 15, right: 15, top: 15, bottom: 90),
-              child: GridView.builder(
-                physics: const BouncingScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 0.70,
-                ),
-                itemCount: widget.services.length,
-                itemBuilder: (context, index) {
-                  final service = widget.services[index];
-                  return _buildServiceCard(
-                    service['name']!.toString(),
-                    service['duration']!.toString(),
-                    service['price']!.toString(),
-                    service['imageUrl']?.toString() ?? '',
-                  );
-                },
-              ),
-            ),
-          ),
-          if (_checkoutManager.count > 0)
-            Positioned(
-              bottom: 20,
-              left: 20,
-              right: 20,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CheckoutPage(),
-                    ),
-                  ).then((_) => setState(() {}));
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8B0000),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  elevation: 8,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(width: 10),
-                    Text(
-                      'View Checkout (${_checkoutManager.count})',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildServiceCard(String name, String duration, String price, String imageUrl) {
-    final isSelected = _checkoutManager.hasService(name);
-    
-    return GestureDetector(
-      onTap: () {
-        _tempImageUrl = imageUrl;
-        
-        print('=== SERVICE SELECTED ===');
-        print('Name: $name');
-        print('Duration: $duration');
-        print('Price: $price');
-        print('Image URL: $imageUrl');
-        print('=======================');
-        
-        _showServiceConfirmation(name, duration, price);
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFE8F5E9) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF4CAF50) : Colors.transparent,
-            width: 2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(25),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 1,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFFC8E6C9) : Colors.grey[200],
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                ),
-                child: Stack(
-                  children: [
-                    if (imageUrl != null && imageUrl.isNotEmpty)
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                        child: Image.asset(
-                          imageUrl,
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Center(
-                              child: Icon(
-                                widget.iconData,
-                                size: 40,
-                                color: Colors.grey[400],
-                              ),
-                            );
-                          },
-                        ),
-                      )
-                    else
-                      Center(
-                        child: Icon(
-                          widget.iconData,
-                          size: 40,
-                          color: isSelected ? const Color(0xFF4CAF50) : Colors.grey[400],
-                        ),
-                      ),
-                    if (isSelected)
-                      const Positioned(
-                        top: 5,
-                        right: 5,
-                        child: Icon(
-                          Icons.check_circle,
-                          color: Color(0xFF4CAF50),
-                          size: 20,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      name,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? const Color(0xFF2E7D32) : Colors.black,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'Duration: $duration',
-                      style: TextStyle(fontSize: 7, color: Colors.grey[600]),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '₱$price',
-                      style: TextStyle(
-                        fontSize: 8.5,
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? const Color(0xFF2E7D32) : const Color(0xFF8B0000),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
+// -----------------------------------------------------------------------------
+// Restored authentication and authenticated navigation pages.
+// These classes are intentionally kept in main.dart to preserve the existing
+// application routing while the newer UI is housed in dedicated page files.
+// -----------------------------------------------------------------------------
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
@@ -1306,11 +291,11 @@ class _SignUpPageState extends State<SignUpPage> {
       address: '',
     );
 
+    if (!mounted) return;
+    if (!mounted) return;
     setState(() {
       _isLoading = false;
     });
-
-    if (!mounted) return;
 
     if (error == null) {
       showDialog(
@@ -1699,7 +684,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Widget _buildGenderDropdown() {
     return DropdownButtonFormField<String>(
-      value: selectedGender,
+      initialValue: selectedGender,
       decoration: InputDecoration(
         labelText: 'Gender',
         labelStyle: TextStyle(
@@ -1763,6 +748,7 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 }
 
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -1804,6 +790,7 @@ class _LoginPageState extends State<LoginPage> {
       password: password,
     );
 
+    if (!mounted) return;
     setState(() {
       _isLoading = false;
     });
@@ -1836,12 +823,16 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8DC),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFFFFF8DC),
         elevation: 0,
+        toolbarHeight: 88,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF8B6F47)),
+          tooltip: 'Back',
+          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary, size: 28),
           onPressed: () => Navigator.pop(context),
         ),
+        centerTitle: true,
+        title: const _SalonMark(size: 44),
       ),
       body: SafeArea(
         child: Center(
@@ -1851,23 +842,22 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Logo or Title
-                const Text(
+                const SizedBox(height: 28),
+                Text(
                   'Welcome Back',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF8B6F47),
+                  style: AppTypography.buildTextTheme().headlineLarge?.copyWith(
+                    fontSize: 34,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.primary,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Sign in to continue',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF8B6F47),
+                  style: AppTypography.buildTextTheme().bodyLarge?.copyWith(
+                    color: AppColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 48),
@@ -1989,7 +979,7 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: _isLoading ? null : _login,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF8B0000),
-                      disabledBackgroundColor: const Color(0xFF8B0000).withOpacity(0.6),
+                      disabledBackgroundColor: const Color(0xFF8B0000).withValues(alpha: 0.6),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -2076,6 +1066,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
+
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
 
@@ -2106,11 +1097,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
     String? error = await _authService.resetPassword(email: email);
 
+    if (!mounted) return;
+    if (!mounted) return;
     setState(() {
       _isLoading = false;
     });
-
-    if (!mounted) return;
 
     if (error == null) {
       showDialog(
@@ -2310,6 +1301,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 }
 
+
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
@@ -2333,6 +1325,7 @@ class _MainPageState extends State<MainPage> {
   Future<void> _loadUserData() async {
     final userData = await _authService.getUserData();
     final currentUser = _authService.currentUser;
+    if (!mounted) return;
     
     setState(() {
       if (userData != null) {
@@ -2350,36 +1343,59 @@ class _MainPageState extends State<MainPage> {
       drawerEnableOpenDragGesture: false,
       endDrawerEnableOpenDragGesture: false,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFBEB5A8),
+        backgroundColor: AppColors.surface,
         elevation: 0,
         automaticallyImplyLeading: false,
-        toolbarHeight: 70,
+        toolbarHeight: 82,
         titleSpacing: 20,
-        actions: const [SizedBox.shrink()],
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'SALON',
-              style: TextStyle(
-                color: Color(0xFF8B0000),
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Georgia',
+        title: const _SalonMark(size: 38),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 6),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.selectedBackground,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircleAvatar(
+                      radius: 15,
+                      backgroundColor: AppColors.primary,
+                      child: Text(
+                        _userName.isNotEmpty ? _userName[0].toUpperCase() : 'U',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    if (MediaQuery.sizeOf(context).width >= 520)
+                      Text(
+                        _userName,
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 13,
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
-            IconButton(
-              icon: const Icon(
-                Icons.menu,
-                color: Color(0xFF8B0000),
-                size: 32,
-              ),
-              onPressed: () {
-                _scaffoldKey.currentState?.openEndDrawer();
-              },
-            ),
-          ],
-        ),
+          ),
+          IconButton(
+            tooltip: 'Menu',
+            icon: const Icon(Icons.menu_rounded, color: AppColors.primary, size: 28),
+            onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       endDrawer: Drawer(
         width: 280,
@@ -2408,15 +1424,15 @@ class _MainPageState extends State<MainPage> {
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.2,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       _userEmail,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontSize: 13,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -2498,42 +1514,30 @@ class _MainPageState extends State<MainPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SizedBox(height: 10),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HaircutServicesPage()),
-                  );
-                },
-                child: const ServiceCard(
-                  title: 'Haircut',
-                  imageUrl: 'assets/images/cards/haircut-card.jpg',
+              ServiceCard(
+                title: 'Haircut',
+                imageUrl: 'assets/images/cards/haircut-card.jpg',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HaircutServicesPage()),
                 ),
               ),
-              const SizedBox(height: 5),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HairServicesPage()),
-                  );
-                },
-                child: const ServiceCard(
-                  title: 'Hair Treatment',
-                  imageUrl: 'assets/images/cards/treatment-card.jpg',
+              const SizedBox(height: 10),
+              ServiceCard(
+                title: 'Hair Treatment',
+                imageUrl: 'assets/images/cards/treatment-card.jpg',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HairServicesPage()),
                 ),
               ),
-              const SizedBox(height: 5),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HairColorPage()),
-                  );
-                },
-                child: const ServiceCard(
-                  title: 'Hair Color',
-                  imageUrl: 'assets/images/cards/color-card.jpg',
+              const SizedBox(height: 10),
+              ServiceCard(
+                title: 'Hair Color',
+                imageUrl: 'assets/images/cards/color-card.jpg',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HairColorPage()),
                 ),
               ),
               const SizedBox(height: 10),
@@ -2653,6 +1657,7 @@ class _MainPageState extends State<MainPage> {
                             Navigator.pop(context); // Close drawer
                             await AuthService().signOut();
                             CheckoutManager().clear();
+                            if (!mounted) return;
                             Navigator.of(context).pushAndRemoveUntil(
                               MaterialPageRoute(builder: (context) => const HomePage()),
                               (route) => false,
@@ -2687,27 +1692,14 @@ class _MainPageState extends State<MainPage> {
   }
 }
 
+
 class HaircutServicesPage extends StatelessWidget {
   const HaircutServicesPage({super.key});
-
-  static final List<SalonService> _services = [
-    SalonService(id: 'haircut_layered_cut', name: 'Layered Cut', durationMinutes: 45, price: 800, imageUrl: 'assets/images/haircuts/layered-cut.jpg'),
-    SalonService(id: 'haircut_bob_cut', name: 'Bob Cut', durationMinutes: 40, price: 700, imageUrl: 'assets/images/haircuts/bob-cut.jpg'),
-    SalonService(id: 'haircut_curtain_bangs', name: 'Curtain Bangs', durationMinutes: 35, price: 700, imageUrl: 'assets/images/haircuts/curtain-bangs.jpg'),
-    SalonService(id: 'haircut_feather_cut', name: 'Feather Cut', durationMinutes: 45, price: 850, imageUrl: 'assets/images/haircuts/feather-cut.jpg'),
-    SalonService(id: 'haircut_wolf_cut', name: 'Wolf Cut', durationMinutes: 50, price: 1000, imageUrl: 'assets/images/haircuts/wolf-cut.jpg'),
-    SalonService(id: 'haircut_fade_cut', name: 'Fade Cut', durationMinutes: 35, price: 450, imageUrl: 'assets/images/haircuts/fade-cut.jpg'),
-    SalonService(id: 'haircut_undercut', name: 'Undercut', durationMinutes: 30, price: 400, imageUrl: 'assets/images/haircuts/undercut.jpg'),
-    SalonService(id: 'haircut_crew_cut', name: 'Crew Cut', durationMinutes: 25, price: 350, imageUrl: 'assets/images/haircuts/crew-cut.jpg'),
-    SalonService(id: 'haircut_pompadour', name: 'Pompadour', durationMinutes: 40, price: 500, imageUrl: 'assets/images/haircuts/pompadour.jpg'),
-    SalonService(id: 'haircut_taper_cut', name: 'Taper Cut', durationMinutes: 30, price: 400, imageUrl: 'assets/images/haircuts/taper-cut.jpg'),
-  ];
 
   @override
   Widget build(BuildContext context) {
     return ServiceSelectionPage(
       categoryTitle: 'Haircut',
-      services: _services,
       onContinue: (context, selected, totalDuration, totalPrice) {
         Navigator.push(
           context,
@@ -2727,7 +1719,7 @@ class HaircutServicesPage extends StatelessWidget {
                           'name': s.name,
                           'duration': s.formattedDuration,
                           'price': s.price.toInt().toString(),
-                          'category': 'Haircut',
+                          'category': s.category,
                         }).toList(),
                         scheduledStaffId: staffId,
                         scheduledStartTime: startTime,
@@ -2747,23 +1739,10 @@ class HaircutServicesPage extends StatelessWidget {
 class HairServicesPage extends StatelessWidget {
   const HairServicesPage({super.key});
 
-  static final List<SalonService> _services = [
-    SalonService(id: 'treat_keratin', name: 'Keratin Treatment', durationMinutes: 120, price: 2000, imageUrl: 'assets/images/treatments/keratin-treatment.jpg'),
-    SalonService(id: 'treat_brazilian', name: 'Brazilian Blowout', durationMinutes: 150, price: 2500, imageUrl: 'assets/images/treatments/brazilian-blowout.jpg'),
-    SalonService(id: 'treat_rebonding', name: 'Hair Rebonding', durationMinutes: 180, price: 2800, imageUrl: 'assets/images/treatments/hair-rebonding.jpg'),
-    SalonService(id: 'treat_spa', name: 'Hair Spa / Deep Conditioning', durationMinutes: 60, price: 700, imageUrl: 'assets/images/treatments/hair-spa.jpg'),
-    SalonService(id: 'treat_hot_oil', name: 'Hot Oil Treatment', durationMinutes: 45, price: 500, imageUrl: 'assets/images/treatments/hot-oil-treatment.jpg'),
-    SalonService(id: 'treat_botox', name: 'Hair Botox / Bond Repair', durationMinutes: 120, price: 2200, imageUrl: 'assets/images/treatments/hair-botox.jpg'),
-    SalonService(id: 'treat_scalp', name: 'Scalp Detox / Scalp Treatment', durationMinutes: 45, price: 600, imageUrl: 'assets/images/treatments/scalp-detox.jpg'),
-    SalonService(id: 'treat_olaplex', name: 'Olaplex / Smartbond Treatment', durationMinutes: 90, price: 1800, imageUrl: 'assets/images/treatments/smart-bond.jpg'),
-    SalonService(id: 'treat_color_protect', name: 'Color Protect Treatment', durationMinutes: 60, price: 1000, imageUrl: 'assets/images/treatments/color-protect.jpg'),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return ServiceSelectionPage(
       categoryTitle: 'Hair Treatment',
-      services: _services,
       onContinue: (context, selected, totalDuration, totalPrice) {
         Navigator.push(
           context,
@@ -2783,7 +1762,7 @@ class HairServicesPage extends StatelessWidget {
                           'name': s.name,
                           'duration': s.formattedDuration,
                           'price': s.price.toInt().toString(),
-                          'category': 'Hair Treatment',
+                          'category': s.category,
                         }).toList(),
                         scheduledStaffId: staffId,
                         scheduledStartTime: startTime,
@@ -2803,23 +1782,10 @@ class HairServicesPage extends StatelessWidget {
 class HairColorPage extends StatelessWidget {
   const HairColorPage({super.key});
 
-  static final List<SalonService> _services = [
-    SalonService(id: 'color_ash_brown', name: 'Ash Brown', durationMinutes: 90, price: 2000, imageUrl: 'assets/images/colors/ash-brown.jpg'),
-    SalonService(id: 'color_balayage', name: 'Balayage', durationMinutes: 150, price: 2500, imageUrl: 'assets/images/colors/balayage.jpg'),
-    SalonService(id: 'color_ombre', name: 'Ombre', durationMinutes: 120, price: 2200, imageUrl: 'assets/images/colors/ombre.jpg'),
-    SalonService(id: 'color_blonde', name: 'Blonde', durationMinutes: 120, price: 2000, imageUrl: 'assets/images/colors/blonde.jpg'),
-    SalonService(id: 'color_rose_gold', name: 'Rose Gold', durationMinutes: 120, price: 2400, imageUrl: 'assets/images/colors/rose-gold.jpg'),
-    SalonService(id: 'color_burgundy', name: 'Burgundy', durationMinutes: 90, price: 1800, imageUrl: 'assets/images/colors/burgundy.jpg'),
-    SalonService(id: 'color_jet_black', name: 'Jet Black', durationMinutes: 60, price: 1200, imageUrl: 'assets/images/colors/jet-black.jpg'),
-    SalonService(id: 'color_silver', name: 'Silver', durationMinutes: 120, price: 2400, imageUrl: 'assets/images/colors/silver.jpg'),
-    SalonService(id: 'color_violet', name: 'Violet', durationMinutes: 120, price: 2200, imageUrl: 'assets/images/colors/violet.jpg'),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return ServiceSelectionPage(
       categoryTitle: 'Hair Color',
-      services: _services,
       onContinue: (context, selected, totalDuration, totalPrice) {
         Navigator.push(
           context,
@@ -2839,7 +1805,7 @@ class HairColorPage extends StatelessWidget {
                           'name': s.name,
                           'duration': s.formattedDuration,
                           'price': s.price.toInt().toString(),
-                          'category': 'Hair Color',
+                          'category': s.category,
                         }).toList(),
                         scheduledStaffId: staffId,
                         scheduledStartTime: startTime,
@@ -2856,124 +1822,34 @@ class HairColorPage extends StatelessWidget {
   }
 }
 
-class CheckoutPage extends StatefulWidget {
-  const CheckoutPage({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<CheckoutPage> createState() => _CheckoutPageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderStateMixin {
-  final CheckoutManager _checkoutManager = CheckoutManager();
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
+class _HomePageState extends State<HomePage> {
+  void _openGuestService(String title, String category, IconData icon) {
+    final services = allSalonServices
+        .where((service) => service.category == category)
+        .map((service) => <String, String>{
+              'name': service.name,
+              'duration': service.formattedDuration,
+              'price': service.formattedPrice,
+              'imageUrl': service.imageUrl,
+              'category': service.category,
+            })
+        .toList();
 
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _fadeAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    );
-    _animationController.forward();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  int _parseDuration(String duration) {
-    final parts = duration.toUpperCase().split(' ');
-    if (parts.length < 2) return 30;
-    
-    final value = double.tryParse(parts[0]) ?? 0.5;
-    final unit = parts[1];
-    
-    if (unit.contains('HOUR')) {
-      return (value * 60).toInt();
-    }
-    return value.toInt();
-  }
-
-  int _calculateTotal() {
-    int total = 0;
-    for (var service in _checkoutManager.selectedServices) {
-      total += int.parse(service['price'] ?? '0');
-    }
-    return total;
-  }
-
-  int _calculateTotalDuration() {
-    int total = 0;
-    for (var service in _checkoutManager.selectedServices) {
-      final durationStr = service['duration'] ?? '30 MINUTES';
-      total += _parseDuration(durationStr);
-    }
-    return total;
-  }
-
-  void _removeService(int index) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFD3CBBB),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
-          children: [
-            Icon(Icons.warning_amber_rounded, color: Color(0xFF8B0000), size: 28),
-            SizedBox(width: 10),
-            Text(
-              'Remove Service?',
-              style: TextStyle(
-                color: Color(0xFF8B0000),
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-          ],
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => GuestServicePage(
+          title: title,
+          services: services,
+          iconData: icon,
         ),
-        content: Text(
-          'Are you sure you want to remove "${_checkoutManager.selectedServices[index]['name']}" from your checkout?',
-          style: const TextStyle(fontSize: 15),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.grey, fontSize: 16),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                _checkoutManager.removeService(index);
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Service removed from checkout'),
-                  duration: Duration(seconds: 2),
-                  backgroundColor: Color(0xFF8B0000),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF8B0000),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            child: const Text(
-              'Remove',
-              style: TextStyle(color: Colors.white, fontSize: 16),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -2981,548 +1857,592 @@ class _CheckoutPageState extends State<CheckoutPage> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8DC),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF8B0000),
+        automaticallyImplyLeading: false,
+        toolbarHeight: 82,
+        titleSpacing: 20,
+        backgroundColor: AppColors.surface,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Service Checkout',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: const _SalonMark(size: 38),
         actions: [
-          if (_checkoutManager.count > 0)
-            Center(
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: TextButton.icon(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginPage()),
+              ),
+              icon: const Icon(Icons.login_rounded, size: 18),
+              label: const Text('Log in'),
+            ),
+          ),
+        ],
+      ),
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 6),
               child: Container(
-                margin: const EdgeInsets.only(right: 16),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primaryDark, AppColors.primary],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.16),
+                      blurRadius: 24,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.spa, color: Colors.white, size: 18),
-                    const SizedBox(width: 6),
-                    Text(
-                      '${_checkoutManager.count}',
-                      style: const TextStyle(
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: const Text(
+                        'BEAUTY • CARE • CONFIDENCE',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    const Text(
+                      'Your next great\nlook starts here.',
+                      style: TextStyle(
                         color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 32,
+                        height: 1.06,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.9,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Explore our signature services and book a time that works for you.',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.82),
+                        fontSize: 14,
+                        height: 1.45,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: 170,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const SignUpPage()),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: AppColors.primary,
+                          minimumSize: const Size(0, 50),
+                        ),
+                        child: const Text('Create account'),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
+          ),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(20, 22, 20, 12),
+              child: Text(
+                'Explore services',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.45),
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                ModernServiceCard(
+                  title: 'Haircut',
+                  subtitle: 'Cuts, trims & styling',
+                  imageUrl: 'assets/images/cards/haircut-card.jpg',
+                  onTap: () => _openGuestService('Haircut', 'Haircut', Icons.content_cut_rounded),
+                ),
+                SizedBox(height: 14),
+                ModernServiceCard(
+                  title: 'Hair Treatment',
+                  subtitle: 'Repair, nourish & restore',
+                  imageUrl: 'assets/images/cards/treatment-card.jpg',
+                  onTap: () => _openGuestService('Hair Treatment', 'Hair Treatment', Icons.spa_rounded),
+                ),
+                SizedBox(height: 14),
+                ModernServiceCard(
+                  title: 'Hair Color',
+                  subtitle: 'Color, tone & transform',
+                  imageUrl: 'assets/images/cards/color-card.jpg',
+                  onTap: () => _openGuestService('Hair Color', 'Hair Color', Icons.palette_outlined),
+                ),
+              ]),
+            ),
+          ),
         ],
       ),
-      body: _checkoutManager.count == 0
-          ? Center(
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(30),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withAlpha(20),
-                            blurRadius: 20,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.event_note,
-                        size: 80,
-                        color: Colors.grey[400],
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-                    Text(
-                      'No services selected',
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Add services to start booking your appointment',
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.grey[600],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 30),
-                    ElevatedButton.icon(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.add_circle_outline, color: Colors.white),
-                      label: const Text(
-                        'Browse Services',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF8B0000),
-                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        elevation: 4,
-                      ),
-                    ),
-                  ],
-                ),
+    );
+  }
+}
+
+class ServiceCard extends StatelessWidget {
+  final String title;
+  final String? imageUrl;
+  final VoidCallback onTap;
+
+  const ServiceCard({
+    super.key,
+    required this.title,
+    this.imageUrl,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ModernServiceCard(
+      title: title,
+      subtitle: 'Discover your next signature look',
+      imageUrl: imageUrl,
+      onTap: onTap,
+    );
+  }
+}
+
+class ModernServiceCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String? imageUrl;
+  final VoidCallback onTap;
+
+  const ModernServiceCard({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.imageUrl,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: onTap,
+        child: Ink(
+          height: 188,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.045),
+                blurRadius: 18,
+                offset: const Offset(0, 9),
               ),
-            )
-          : Column(
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: Stack(
+              fit: StackFit.expand,
               children: [
-                Container(
-                  margin: const EdgeInsets.all(15),
-                  padding: const EdgeInsets.all(20),
+                if (imageUrl != null)
+                  Image.asset(
+                    imageUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => ColoredBox(color: AppColors.surfaceAlt),
+                  )
+                else
+                  const ColoredBox(color: AppColors.surfaceAlt),
+                DecoratedBox(
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF8B0000), Color(0xFFA52A2A)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        AppColors.primaryDark.withValues(alpha: 0.88),
+                      ],
                     ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF8B0000).withAlpha(60),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
                   ),
+                ),
+                Positioned(
+                  left: 18,
+                  right: 18,
+                  bottom: 18,
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Total Services',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
+                            Text(
+                              title,
+                              style: AppTypography.buildTextTheme().headlineSmall?.copyWith(
+                                color: Colors.white,
+                                fontSize: 23,
+                                fontWeight: FontWeight.w900,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 3),
                             Text(
-                              '${_checkoutManager.count} service${_checkoutManager.count > 1 ? 's' : ''}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                              subtitle,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.78),
+                                fontSize: 12.5,
                               ),
                             ),
                           ],
                         ),
                       ),
+                      const SizedBox(width: 10),
                       Container(
-                        width: 2,
+                        width: 40,
                         height: 40,
-                        color: Colors.white30,
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            const Text(
-                              'Total Duration',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${_calculateTotalDuration()} mins',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    itemCount: _checkoutManager.count,
-                    itemBuilder: (context, index) {
-                      final service = _checkoutManager.selectedServices[index];
-                      final imageUrl = service['imageUrl']?.toString();
-                      
-                      print('Service: ${service['name']}, ImageUrl: $imageUrl');
-                      
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withAlpha(15),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                          color: Colors.white.withValues(alpha: 0.96),
+                          borderRadius: BorderRadius.circular(13),
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Dismissible(
-                            key: Key('${service['name']}_$index'),
-                            direction: DismissDirection.endToStart,
-                            background: Container(
-                              alignment: Alignment.centerRight,
-                              padding: const EdgeInsets.only(right: 20),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [Colors.red.shade300, Colors.red.shade600],
-                                ),
-                              ),
-                              child: const Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.delete_outline, color: Colors.white, size: 32),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    'Remove',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            confirmDismiss: (direction) async {
-                              return await showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  backgroundColor: const Color(0xFFD3CBBB),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  title: const Row(
-                                    children: [
-                                      Icon(Icons.warning_amber_rounded, color: Color(0xFF8B0000), size: 28),
-                                      SizedBox(width: 10),
-                                      Text(
-                                        'Remove Service?',
-                                        style: TextStyle(
-                                          color: Color(0xFF8B0000),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  content: Text(
-                                    'Remove "${service['name']}" from checkout?',
-                                    style: const TextStyle(fontSize: 15),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context, false),
-                                      child: const Text(
-                                        'Cancel',
-                                        style: TextStyle(color: Colors.grey, fontSize: 16),
-                                      ),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () => Navigator.pop(context, true),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF8B0000),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                      ),
-                                      child: const Text(
-                                        'Remove',
-                                        style: TextStyle(color: Colors.white, fontSize: 16),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                            onDismissed: (direction) {
-                              setState(() {
-                                _checkoutManager.removeService(index);
-                              });
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('${service['name']} removed'),
-                                  duration: const Duration(seconds: 2),
-                                  backgroundColor: const Color(0xFF8B0000),
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                              );
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
-                                children: [
-                                  Hero(
-                                    tag: 'service_${service['name']}',
-                                    child: Container(
-                                      width: 85,
-                                      height: 85,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFE8DCC8),
-                                        borderRadius: BorderRadius.circular(12),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withAlpha(20),
-                                            blurRadius: 6,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: imageUrl != null && imageUrl.isNotEmpty
-                                            ? Image.asset(
-                                                imageUrl,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (context, error, stackTrace) {
-                                                  return const Center(
-                                                    child: Icon(
-                                                      Icons.spa,
-                                                      color: Color(0xFF8B0000),
-                                                      size: 32,
-                                                    ),
-                                                  );
-                                                },
-                                              )
-                                            : const Center(
-                                                child: Icon(
-                                                  Icons.spa,
-                                                  color: Color(0xFF8B0000),
-                                                  size: 32,
-                                                ),
-                                              ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 15),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          service['name'] ?? 'Service Name',
-                                          style: const TextStyle(
-                                            fontSize: 17,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xFF2C2C2C),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Row(
-                                          children: [
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 8,
-                                                vertical: 4,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFF8B0000).withOpacity(0.1),
-                                                borderRadius: BorderRadius.circular(6),
-                                              ),
-                                              child: Row(
-                                                children: [
-                                                  const Icon(
-                                                    Icons.access_time,
-                                                    size: 14,
-                                                    color: Color(0xFF8B0000),
-                                                  ),
-                                                  const SizedBox(width: 4),
-                                                  Text(
-                                                    service['duration'] ?? 'N/A',
-                                                    style: const TextStyle(
-                                                      fontSize: 12,
-                                                      color: Color(0xFF8B0000),
-                                                      fontWeight: FontWeight.w600,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          '₱${service['price'] ?? '0'}',
-                                          style: const TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xFF8B0000),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.delete_outline,
-                                      color: Colors.redAccent,
-                                      size: 26,
-                                    ),
-                                    onPressed: () => _removeService(index),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                Container(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(30),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(30),
-                        blurRadius: 20,
-                        offset: const Offset(0, -5),
+                        child: const Icon(Icons.arrow_forward_rounded, color: AppColors.primary),
                       ),
                     ],
-                  ),
-                  child: SafeArea(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Total Amount',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF5C5C5C),
-                              ),
-                            ),
-                            Text(
-                              '₱${_calculateTotal()}',
-                              style: const TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF8B0000),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 58,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              int totalDuration = _calculateTotalDuration();
-                              
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ChangeNotifierProvider(
-                                    create: (_) => SchedulingProvider(),
-                                    child: StaffSchedulingPage(
-                                      totalDurationMinutes: totalDuration,
-                                      onScheduleConfirmed: (staffId, startTime) {
-                                        Navigator.pop(context);
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => PaymentPage(
-                                              totalAmount: _calculateTotal(),
-                                              services: _checkoutManager.selectedServices,
-                                              scheduledStaffId: staffId,
-                                              scheduledStartTime: startTime,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF8B0000),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              elevation: 6,
-                              shadowColor: const Color(0xFF8B0000).withAlpha(80),
-                            ),
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Continue to Schedule',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                Icon(
-                                  Icons.arrow_forward_rounded,
-                                  color: Colors.white,
-                                  size: 24,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class GuestServicePage extends StatelessWidget {
+  final String title;
+  final List<Map<String, String>> services;
+  final IconData iconData;
+
+  const GuestServicePage({
+    super.key,
+    required this.title,
+    required this.services,
+    required this.iconData,
+  });
+
+  void _showLoginDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return Container(
+          padding: const EdgeInsets.fromLTRB(22, 14, 22, 24),
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 48,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  width: 58,
+                  height: 58,
+                  decoration: const BoxDecoration(
+                    color: AppColors.selectedBackground,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(iconData, color: AppColors.primary, size: 28),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Ready to book your look?',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 7),
+                const Text(
+                  'Create an account or log in to reserve a service, choose your stylist, and manage your appointments.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.45,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(sheetContext);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LoginPage()),
+                      );
+                    },
+                    icon: const Icon(Icons.login_rounded),
+                    label: const Text('Log in to book'),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(sheetContext);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const SignUpPage()),
+                      );
+                    },
+                    icon: const Icon(Icons.person_add_alt_1_rounded),
+                    label: const Text('Create an account'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final columns = width >= 1100 ? 4 : width >= 720 ? 3 : 2;
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: Text(title),
+        leading: IconButton(
+          tooltip: 'Back',
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
+      ),
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 10, 18, 8),
+              child: Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primaryDark, AppColors.primary],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Icon(iconData, color: Colors.white, size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '$title • ${services.length} options',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          const Text(
+                            'Tap any service to view details and book.',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 11.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(18, 10, 18, 28),
+            sliver: SliverGrid(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final service = services[index];
+                  final image = service['imageUrl'];
+                  final price = service['price'] ?? '';
+                  final duration = service['duration'] ?? '';
+
+                  return Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(22),
+                      onTap: () => _showLoginDialog(context),
+                      child: Ink(
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(22),
+                          border: Border.all(color: AppColors.border),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.055),
+                              blurRadius: 18,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(
+                              flex: 6,
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.vertical(top: Radius.circular(21)),
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    Image.asset(
+                                      image ?? '',
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, _, _) => Container(
+                                        decoration: const BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [Color(0xFFEAD7DA), Color(0xFFF7F0F1)],
+                                          ),
+                                        ),
+                                        child: Icon(iconData, color: AppColors.primary, size: 34),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 10,
+                                      left: 10,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withValues(alpha: 0.38),
+                                          borderRadius: BorderRadius.circular(999),
+                                        ),
+                                        child: Text(
+                                          service['category'] ?? title,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 9.5,
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 4,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(12, 11, 12, 12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        service['name'] ?? '',
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 13.5,
+                                          fontWeight: FontWeight.w900,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.schedule_rounded, size: 13, color: AppColors.textSecondary),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Text(
+                                            duration,
+                                            style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary, fontWeight: FontWeight.w700),
+                                          ),
+                                        ),
+                                        Text(
+                                          price,
+                                          style: const TextStyle(fontSize: 13.5, color: AppColors.primary, fontWeight: FontWeight.w900),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                childCount: services.length,
+              ),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columns,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: width < 420 ? 0.77 : 0.82,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -3572,16 +2492,14 @@ class _PaymentPageState extends State<PaymentPage> with SingleTickerProviderStat
   }
 
   String _getStaffName(String staffId) {
-    final staffMap = {
-      'staff_1': 'Alice',
-      'staff_2': 'Bob',
-      'staff_3': 'Charlie',
-    };
-    return staffMap[staffId] ?? 'Staff';
+    for (final staff in StaffMember.defaults) {
+      if (staff.id == staffId) return staff.name;
+    }
+    return 'Staff';
   }
 
   void _processPayment() async {
-    if (_isProcessing) return;
+    if (_isProcessing || !mounted) return;
 
     setState(() {
       _isProcessing = true;
@@ -3615,11 +2533,11 @@ class _PaymentPageState extends State<PaymentPage> with SingleTickerProviderStat
       );
     }
 
+    if (!mounted) return;
+
     setState(() {
       _isProcessing = false;
     });
-
-    if (!mounted) return;
 
     if (error != null) {
       _showErrorDialog('Booking Failed', error);
@@ -3720,156 +2638,87 @@ class _PaymentPageState extends State<PaymentPage> with SingleTickerProviderStat
   }
 
   void _showSuccessDialog() {
-    _animationController.forward();
-    
+    _animationController.forward(from: 0);
+
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
-        return ScaleTransition(
-          scale: _scaleAnimation,
-          child: Dialog(
-            backgroundColor: Colors.transparent,
-            child: Container(
-              padding: const EdgeInsets.all(35),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFE8F5E9), Colors.white],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(50),
-                    blurRadius: 30,
-                    offset: const Offset(0, 15),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(25),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.green.shade400, Colors.green.shade600],
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.green.withAlpha(80),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
+      builder: (dialogContext) {
+        final appointment = widget.scheduledStartTime;
+        final staffName = widget.scheduledStaffId == null
+            ? null
+            : _getStaffName(widget.scheduledStaffId!);
+
+        return FadeTransition(
+          opacity: CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: Dialog(
+              insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 68,
+                      height: 68,
+                      decoration: const BoxDecoration(color: Color(0xFFE8F7EE), shape: BoxShape.circle),
+                      child: const Icon(Icons.check_rounded, color: AppColors.success, size: 38),
                     ),
-                    child: const Icon(
-                      Icons.check_circle_outline,
-                      color: Colors.white,
-                      size: 70,
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  const Text(
-                    'Booking Confirmed!',
-                    style: TextStyle(
-                      color: Color(0xFF2E7D32),
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 15),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.green.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.green.shade200),
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.payments_outlined,
-                              color: Colors.green.shade700,
-                              size: 24,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '₱${widget.totalAmount}',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green.shade700,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'via $selectedPayment',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Your appointment has been successfully booked!\nYou will receive a confirmation shortly.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Colors.grey[700],
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 35),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 55,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        CheckoutManager().clear();
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (context) => const MainPage()),
-                          (route) => false,
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4CAF50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        elevation: 4,
-                        shadowColor: Colors.green.withAlpha(100),
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                    const SizedBox(height: 14),
+                    const Text('You’re all set', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                    const SizedBox(height: 4),
+                    const Text('Your appointment has been successfully booked.', textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
+                    const SizedBox(height: 16),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(18)),
+                      child: Column(
                         children: [
-                          Text(
-                            'Back to Home',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('Total', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                              Text('₱${widget.totalAmount}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primary)),
+                            ],
                           ),
-                          SizedBox(width: 8),
-                          Icon(Icons.home_rounded, color: Colors.white),
+                          if (appointment != null) ...[
+                            const SizedBox(height: 10),
+                            _successRow(Icons.calendar_today_rounded, DateFormat('EEE, MMM d').format(appointment)),
+                            const SizedBox(height: 7),
+                            _successRow(Icons.schedule_rounded, TimeOfDay.fromDateTime(appointment).format(context)),
+                            if (staffName != null) ...[
+                              const SizedBox(height: 7),
+                              _successRow(Icons.person_rounded, staffName),
+                            ],
+                          ],
+                          const SizedBox(height: 7),
+                          _successRow(selectedPayment == 'Cash' ? Icons.payments_rounded : Icons.account_balance_wallet_rounded, 'Paid via $selectedPayment'),
                         ],
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          context.read<ServiceSelectionProvider>().clearSelection();
+                          CheckoutManager().clear();
+                          Navigator.of(dialogContext).pop();
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(builder: (context) => const MainPage()),
+                            (route) => false,
+                          );
+                        },
+                        icon: const Icon(Icons.home_rounded),
+                        label: const Text('Back to Home'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -3878,482 +2727,258 @@ class _PaymentPageState extends State<PaymentPage> with SingleTickerProviderStat
     );
   }
 
+  Widget _successRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 15, color: AppColors.primary),
+        const SizedBox(width: 7),
+        Expanded(child: Text(text, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary))),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8DC),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF8B0000),
-        elevation: 0,
+        backgroundColor: AppColors.background,
+        surfaceTintColor: Colors.transparent,
+        title: const Text('Checkout'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          tooltip: 'Back',
+          icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Payment',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.07), blurRadius: 18, offset: const Offset(0, -6))],
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              _buildOrderSummary(),
-              const SizedBox(height: 20),
-              
-              if (widget.scheduledStartTime != null)
-                _buildScheduleInfo(),
-              
-              if (widget.scheduledStartTime != null)
-                const SizedBox(height: 25),
-
-              const Text(
-                'Select Payment Method',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF2C2C2C),
-                ),
+              Row(
+                children: [
+                  const Icon(Icons.lock_outline_rounded, size: 16, color: AppColors.textSecondary),
+                  const SizedBox(width: 6),
+                  const Expanded(child: Text('Secure checkout • Review everything before confirming.', style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary))),
+                  Text('₱${widget.totalAmount}', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: AppColors.primary)),
+                ],
               ),
-              const SizedBox(height: 15),
-
-              _buildPaymentOption('Cash', Icons.payments, 'Pay with cash at the salon'),
-              const SizedBox(height: 12),
-              _buildPaymentOption('GCash', Icons.phone_android, 'Pay via GCash mobile app'),
-
-              const SizedBox(height: 35),
-
+              const SizedBox(height: 10),
               SizedBox(
                 width: double.infinity,
-                height: 58,
+                height: 54,
                 child: ElevatedButton(
                   onPressed: _isProcessing ? null : _processPayment,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8B0000),
-                    disabledBackgroundColor: Colors.grey[400],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 6,
-                    shadowColor: const Color(0xFF8B0000).withAlpha(80),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 180),
+                    child: _isProcessing
+                        ? const Row(key: ValueKey('processing'), mainAxisAlignment: MainAxisAlignment.center, children: [SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2.3, color: Colors.white)), SizedBox(width: 10), Text('Confirming booking…')])
+                        : Row(key: const ValueKey('confirm'), mainAxisAlignment: MainAxisAlignment.center, children: [const Icon(Icons.check_rounded), const SizedBox(width: 8), Text('Confirm payment')]),
                   ),
-                  child: _isProcessing
-                      ? const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.5,
-                              ),
-                            ),
-                            SizedBox(width: 15),
-                            Text(
-                              'Processing...',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.lock_outline, color: Colors.white, size: 22),
-                            const SizedBox(width: 10),
-                            Text(
-                              'Confirm Payment • ₱${widget.totalAmount}',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
                 ),
-              ),
-              const SizedBox(height: 15),
-              
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.security, size: 16, color: Colors.grey[600]),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Your payment information is secure',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
               ),
             ],
           ),
+        ),
+      ),
+      body: SafeArea(
+        top: false,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
+          children: [
+            _buildCheckoutIntro(),
+            const SizedBox(height: 16),
+            _buildOrderSummary(),
+            if (widget.scheduledStartTime != null) ...[
+              const SizedBox(height: 14),
+              _buildScheduleInfo(),
+            ],
+            const SizedBox(height: 20),
+            const Text('Payment method', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+            const SizedBox(height: 5),
+            const Text('Choose how you would like to pay at checkout.', style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
+            const SizedBox(height: 12),
+            _buildPaymentOption('Cash', Icons.payments_rounded, 'Pay at the salon counter'),
+            const SizedBox(height: 10),
+            _buildPaymentOption('GCash', Icons.account_balance_wallet_rounded, 'Pay using the GCash mobile app'),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildOrderSummary() {
+  Widget _buildCheckoutIntro() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 15),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(
+          colors: [AppColors.primaryDark, AppColors.primary],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(15),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: AppColors.primary.withValues(alpha: 0.18),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF8B0000).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.white.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(15),
                 ),
-                child: const Icon(
-                  Icons.receipt_long,
-                  color: Color(0xFF8B0000),
-                  size: 24,
-                ),
+                child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 24),
               ),
               const SizedBox(width: 12),
-              const Text(
-                'Order Summary',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF2C2C2C),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          ...widget.services.map((service) => Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF8DC).withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: Row(
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF8B0000).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.spa,
-                        color: Color(0xFF8B0000),
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            service['name']?.toString() ?? '',
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            service['category']?.toString() ?? '',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      '₱${service['price']}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF8B0000),
-                      ),
-                    ),
+                    Text('Almost there', style: TextStyle(color: Colors.white70, fontSize: 12.5, fontWeight: FontWeight.w800)),
+                    SizedBox(height: 3),
+                    Text('Make it official.', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900)),
                   ],
-                ),
-              )),
-          const SizedBox(height: 10),
-          Container(
-            height: 1,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.grey.shade300,
-                  Colors.grey.shade200,
-                  Colors.grey.shade300,
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 15),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Total Amount',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF2C2C2C),
                 ),
               ),
               Text(
                 '₱${widget.totalAmount}',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF8B0000),
-                ),
+                style: const TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w900),
               ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildScheduleInfo() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.green.shade50, Colors.green.shade100.withOpacity(0.3)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.green.shade300, width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.green.withAlpha(20),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+          const SizedBox(height: 16),
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade600,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.event_available,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                'Appointment Details',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF2E7D32),
-                ),
-              ),
+              _checkoutStep('01', 'Review', active: true),
+              Expanded(child: Container(height: 1, color: Colors.white24)),
+              _checkoutStep('02', 'Payment', active: true),
+              Expanded(child: Container(height: 1, color: Colors.white24)),
+              _checkoutStep('03', 'Done'),
             ],
           ),
-          const SizedBox(height: 18),
-          _buildScheduleRow(
-            Icons.calendar_today,
-            'Date',
-            DateFormat('EEEE, MMM d, yyyy').format(widget.scheduledStartTime!),
-          ),
-          const SizedBox(height: 12),
-          _buildScheduleRow(
-            Icons.access_time,
-            'Time',
-            TimeOfDay.fromDateTime(widget.scheduledStartTime!).format(context),
-          ),
-          if (widget.scheduledStaffId != null) ...[
-            const SizedBox(height: 12),
-            _buildScheduleRow(
-              Icons.person,
-              'Stylist',
-              _getStaffName(widget.scheduledStaffId!),
-            ),
-          ],
         ],
       ),
     );
   }
 
-  Widget _buildScheduleRow(IconData icon, String label, String value) {
+  Widget _checkoutStep(String number, String label, {bool active = false}) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: Colors.green.shade700, size: 20),
-        const SizedBox(width: 12),
-        Text(
-          '$label: ',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey[700],
+        Container(
+          width: 26,
+          height: 26,
+          decoration: BoxDecoration(
+            color: active ? Colors.white : Colors.white.withValues(alpha: 0.12),
+            shape: BoxShape.circle,
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            number,
+            style: TextStyle(
+              color: active ? AppColors.primary : Colors.white54,
+              fontSize: 9.5,
+              fontWeight: FontWeight.w900,
+            ),
           ),
         ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF2E7D32),
-            ),
+        const SizedBox(width: 5),
+        Text(
+          label,
+          style: TextStyle(
+            color: active ? Colors.white : Colors.white54,
+            fontSize: 10.5,
+            fontWeight: FontWeight.w800,
           ),
         ),
       ],
     );
   }
 
+  Widget _buildOrderSummary() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.border)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [Container(width: 42, height: 42, decoration: BoxDecoration(color: AppColors.selectedBackground, borderRadius: BorderRadius.circular(13)), child: const Icon(Icons.receipt_long_rounded, color: AppColors.primary)), const SizedBox(width: 10), const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Order summary', style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.w900)), SizedBox(height: 2), Text('Services included in this booking', style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary))])), Text('${widget.services.length} item${widget.services.length == 1 ? '' : 's'}', style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.textSecondary))]),
+          const SizedBox(height: 14),
+          ...widget.services.map((service) => Container(
+                margin: const EdgeInsets.only(bottom: 9),
+                padding: const EdgeInsets.all(11),
+                decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(16)),
+                child: Row(children: [Container(width: 42, height: 42, decoration: BoxDecoration(color: AppColors.selectedBackground, borderRadius: BorderRadius.circular(13)), child: const Icon(Icons.spa_rounded, color: AppColors.primary, size: 20)), const SizedBox(width: 10), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(service['name']?.toString() ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800)), const SizedBox(height: 3), Text('${service['category'] ?? ''} • ${service['duration'] ?? ''}', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary))])), const SizedBox(width: 8), Text('₱${service['price']}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.primary))]),
+              )),
+          const Divider(height: 20),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('Total', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)), Text('₱${widget.totalAmount}', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.primary))]),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScheduleInfo() {
+    final date = widget.scheduledStartTime!;
+    final staffName = widget.scheduledStaffId == null ? null : _getStaffName(widget.scheduledStaffId!);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: const Color(0xFFEFF8F2), borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.success.withValues(alpha: 0.20))),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [Container(width: 40, height: 40, decoration: BoxDecoration(color: AppColors.success, borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.event_available_rounded, color: Colors.white, size: 20)), const SizedBox(width: 10), const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Appointment confirmed', style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w900, color: AppColors.success)), SizedBox(height: 2), Text('Your selected schedule is reserved for checkout.', style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary))]))]),
+        const SizedBox(height: 14),
+        Wrap(spacing: 8, runSpacing: 8, children: [_schedulePill(Icons.calendar_today_rounded, DateFormat('EEE, MMM d').format(date)), _schedulePill(Icons.schedule_rounded, TimeOfDay.fromDateTime(date).format(context)), if (staffName != null) _schedulePill(Icons.person_rounded, staffName)]),
+      ]),
+    );
+  }
+
+  Widget _schedulePill(IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.72), borderRadius: BorderRadius.circular(12)),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(icon, size: 14, color: AppColors.success), const SizedBox(width: 6), Text(text, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary))]),
+    );
+  }
+
   Widget _buildPaymentOption(String method, IconData icon, String description) {
     final isSelected = selectedPayment == method;
-    
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedPayment = method;
-        });
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF8B0000) : Colors.grey.shade300,
-            width: isSelected ? 2.5 : 1.5,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: _isProcessing ? null : () => setState(() => selectedPayment = method),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.selectedBackground : AppColors.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: isSelected ? AppColors.primary : AppColors.border, width: isSelected ? 1.6 : 1),
+            boxShadow: isSelected
+                ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.10), blurRadius: 14, offset: const Offset(0, 5))]
+                : null,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: const Color(0xFF8B0000).withAlpha(30),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(8),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-        ),
-        child: Row(
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.all(3),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? const Color(0xFF8B0000) : Colors.grey.shade400,
-                  width: 2,
-                ),
-              ),
-              child: Container(
-                width: 16,
-                height: 16,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isSelected ? const Color(0xFF8B0000) : Colors.transparent,
-                ),
-              ),
-            ),
-            const SizedBox(width: 15),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? const Color(0xFF8B0000).withOpacity(0.1)
-                    : Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                icon,
-                color: isSelected ? const Color(0xFF8B0000) : Colors.grey[700],
-                size: 26,
-              ),
-            ),
-            const SizedBox(width: 15),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    method,
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? const Color(0xFF8B0000) : Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (isSelected)
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF8B0000),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.check,
-                  color: Colors.white,
-                  size: 18,
-                ),
-              ),
-          ],
+          child: Row(children: [
+            Container(width: 46, height: 46, decoration: BoxDecoration(color: isSelected ? AppColors.primary : AppColors.surfaceMuted, borderRadius: BorderRadius.circular(15)), child: Icon(icon, color: isSelected ? Colors.white : AppColors.textSecondary, size: 22)),
+            const SizedBox(width: 12),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(method, style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w900, color: isSelected ? AppColors.primary : AppColors.textPrimary)), const SizedBox(height: 3), Text(description, style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary))])),
+            AnimatedContainer(duration: const Duration(milliseconds: 180), width: 24, height: 24, decoration: BoxDecoration(color: isSelected ? AppColors.primary : Colors.transparent, shape: BoxShape.circle, border: Border.all(color: isSelected ? AppColors.primary : AppColors.border, width: 1.6)), child: isSelected ? const Icon(Icons.check_rounded, color: Colors.white, size: 15) : null),
+          ]),
         ),
       ),
     );
@@ -4369,7 +2994,6 @@ class ProfileSettingsPage extends StatefulWidget {
 
 class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   final AuthService _authService = AuthService();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   
   String firstName = '';
   String lastName = '';
@@ -4401,7 +3025,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
         userEmail = currentUser?.email ?? '';
         _isLoading = false;
       });
-    } else {
+    } else if (mounted) {
       setState(() {
         _isLoading = false;
       });
@@ -4411,9 +3035,9 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8DC),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFBEB5A8),
+        backgroundColor: AppColors.surfaceMuted,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -4422,7 +3046,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
         title: const Text(
           'Profile Settings',
           style: TextStyle(
-            color: Color(0xFF8B0000),
+            color: AppColors.primary,
             fontSize: 22,
             fontWeight: FontWeight.bold,
           ),
@@ -4431,7 +3055,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(
-                color: Color(0xFF8B0000),
+                color: AppColors.primary,
               ),
             )
           : SingleChildScrollView(
@@ -4443,14 +3067,14 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                     padding: const EdgeInsets.all(25),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [Color(0xFF8B0000), Color(0xFFB22222)],
+                        colors: [AppColors.primary, AppColors.primaryLight],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           blurRadius: 15,
                           offset: const Offset(0, 5),
                         ),
@@ -4461,7 +3085,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                         Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: Colors.white,
@@ -4597,7 +3221,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -4608,12 +3232,12 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
         leading: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFF8B0000).withOpacity(0.1),
+            color: AppColors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
             icon,
-            color: const Color(0xFF8B0000),
+            color: AppColors.primary,
             size: 28,
           ),
         ),
@@ -4726,6 +3350,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         Navigator.pop(context);
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: ${e.toString()}'),
@@ -4733,18 +3358,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ),
       );
     } finally {
-      setState(() {
-        _isSaving = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8DC),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFBEB5A8),
+        backgroundColor: AppColors.surfaceMuted,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -4753,7 +3380,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         title: const Text(
           'Edit Profile',
           style: TextStyle(
-            color: Color(0xFF8B0000),
+            color: AppColors.primary,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -4771,7 +3398,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF8B0000),
+                  color: AppColors.primary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -4810,7 +3437,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 child: ElevatedButton(
                   onPressed: _isSaving ? null : _saveChanges,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8B0000),
+                    backgroundColor: AppColors.primary,
                     disabledBackgroundColor: Colors.grey[400],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -4869,7 +3496,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF8B0000), width: 2),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -4886,7 +3513,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Widget _buildGenderDropdown() {
     return DropdownButtonFormField<String>(
-      value: selectedGender,
+      initialValue: selectedGender,
       decoration: InputDecoration(
         labelText: 'Gender',
         labelStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
@@ -4903,7 +3530,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF8B0000), width: 2),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
@@ -4987,6 +3614,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         Navigator.pop(context);
       }
     } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
       String errorMessage;
       if (e.code == 'wrong-password') {
         errorMessage = 'Current password is incorrect';
@@ -5010,18 +3638,20 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         ),
       );
     } finally {
-      setState(() {
-        _isChanging = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isChanging = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8DC),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFBEB5A8),
+        backgroundColor: AppColors.surfaceMuted,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -5030,7 +3660,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         title: const Text(
           'Change Password',
           style: TextStyle(
-            color: Color(0xFF8B0000),
+            color: AppColors.primary,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -5048,7 +3678,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF8B0000),
+                  color: AppColors.primary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -5103,7 +3733,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 child: ElevatedButton(
                   onPressed: _isChanging ? null : _changePassword,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8B0000),
+                    backgroundColor: AppColors.primary,
                     disabledBackgroundColor: Colors.grey[400],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -5221,7 +3851,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF8B0000), width: 2),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -5321,6 +3951,7 @@ class _EditPersonalDetailsPageState extends State<EditPersonalDetailsPage> {
         Navigator.pop(context);
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: ${e.toString()}'),
@@ -5328,18 +3959,20 @@ class _EditPersonalDetailsPageState extends State<EditPersonalDetailsPage> {
         ),
       );
     } finally {
-      setState(() {
-        _isSaving = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8DC),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFBEB5A8),
+        backgroundColor: AppColors.surfaceMuted,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -5348,7 +3981,7 @@ class _EditPersonalDetailsPageState extends State<EditPersonalDetailsPage> {
         title: const Text(
           'Personal Details',
           style: TextStyle(
-            color: Color(0xFF8B0000),
+            color: AppColors.primary,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -5366,7 +3999,7 @@ class _EditPersonalDetailsPageState extends State<EditPersonalDetailsPage> {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF8B0000),
+                  color: AppColors.primary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -5469,7 +4102,7 @@ class _EditPersonalDetailsPageState extends State<EditPersonalDetailsPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF8B0000), width: 2),
+                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
                   ),
                   errorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -5493,7 +4126,7 @@ class _EditPersonalDetailsPageState extends State<EditPersonalDetailsPage> {
                 child: ElevatedButton(
                   onPressed: _isSaving ? null : _saveChanges,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8B0000),
+                    backgroundColor: AppColors.primary,
                     disabledBackgroundColor: Colors.grey[400],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -5574,22 +4207,16 @@ class _StaffSchedulesViewPageState extends State<StaffSchedulesViewPage> {
   Map<String, List<ScheduleBlock>> _staffSchedules = {};
   bool _isLoading = true;
 
-  final Map<String, String> _staffNames = {
-    'staff_1': 'Alice',
-    'staff_2': 'Bob',
-    'staff_3': 'Charlie',
-  };
-
   final Map<String, IconData> _staffIcons = {
-    'staff_1': Icons.person,
-    'staff_2': Icons.person_outline,
-    'staff_3': Icons.face,
+    'staff_1': Icons.content_cut_rounded,
+    'staff_2': Icons.spa_rounded,
+    'staff_3': Icons.auto_awesome_rounded,
   };
 
   final Map<String, Color> _staffColors = {
-    'staff_1': Colors.purple,
-    'staff_2': Colors.blue,
-    'staff_3': Colors.teal,
+    'staff_1': const Color(0xFF9B5DE5),
+    'staff_2': const Color(0xFF3A86FF),
+    'staff_3': const Color(0xFF2A9D8F),
   };
 
   @override
@@ -5599,15 +4226,19 @@ class _StaffSchedulesViewPageState extends State<StaffSchedulesViewPage> {
   }
 
   Future<void> _loadSchedules() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
     });
 
     final schedules = <String, List<ScheduleBlock>>{};
-    for (var staffId in _staffNames.keys) {
+    for (final staffMember in _schedulingService.staff) {
+      final staffId = staffMember.id;
       schedules[staffId] = await _schedulingService.getStaffSchedule(staffId, _selectedDate);
+      if (!mounted) return;
     }
 
+    if (!mounted) return;
     setState(() {
       _staffSchedules = schedules;
       _isLoading = false;
@@ -5645,9 +4276,9 @@ class _StaffSchedulesViewPageState extends State<StaffSchedulesViewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8DC),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFBEB5A8),
+        backgroundColor: AppColors.surfaceMuted,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -5656,7 +4287,7 @@ class _StaffSchedulesViewPageState extends State<StaffSchedulesViewPage> {
         title: const Text(
           'Staff Schedules',
           style: TextStyle(
-            color: Color(0xFF8B0000),
+            color: AppColors.primary,
             fontSize: 22,
             fontWeight: FontWeight.bold,
           ),
@@ -5664,80 +4295,38 @@ class _StaffSchedulesViewPageState extends State<StaffSchedulesViewPage> {
       ),
       body: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.chevron_left, size: 32),
-                  onPressed: () => _changeDate(-1),
-                  color: const Color(0xFF8B0000),
-                ),
-                Column(
-                  children: [
-                    Text(
-                      DateFormat('EEEE').format(_selectedDate),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF8B0000),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      DateFormat('MMM d, yyyy').format(_selectedDate),
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-                IconButton(
-                  icon: const Icon(Icons.chevron_right, size: 32),
-                  onPressed: () => _changeDate(1),
-                  color: const Color(0xFF8B0000),
-                ),
-              ],
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.border)),
+              child: Row(children: [
+                IconButton.filledTonal(tooltip: 'Previous day', onPressed: () => _changeDate(-1), icon: const Icon(Icons.chevron_left_rounded)),
+                const SizedBox(width: 8),
+                Expanded(child: Column(children: [Text(DateFormat('EEEE').format(_selectedDate), style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: AppColors.textPrimary)), const SizedBox(height: 2), Text(DateFormat('MMM d, yyyy').format(_selectedDate), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary))])),
+                IconButton.filledTonal(tooltip: 'Next day', onPressed: () => _changeDate(1), icon: const Icon(Icons.chevron_right_rounded)),
+              ]),
             ),
           ),
-
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildLegendItem(Colors.green[100]!, Colors.green, 'Available'),
-                _buildLegendItem(Colors.red[100]!, Colors.red, 'Booked'),
-                _buildLegendItem(Colors.grey[200]!, Colors.grey, 'Unavailable'),
-              ],
-            ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 2, 16, 8),
+            child: Wrap(spacing: 8, runSpacing: 8, children: [_buildLegendItem(const Color(0xFFE8F7EE), AppColors.success, 'Available'), _buildLegendItem(const Color(0xFFFCE8EC), AppColors.danger, 'Occupied'), _buildLegendItem(const Color(0xFFF1EEEC), AppColors.textSecondary, 'Closed')]),
           ),
 
           Expanded(
             child: _isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      color: Color(0xFF8B0000),
+                      color: AppColors.primary,
                     ),
                   )
                 : ListView.builder(
                     padding: const EdgeInsets.all(15),
-                    itemCount: _staffNames.length,
+                    itemCount: _schedulingService.staff.length,
                     itemBuilder: (context, index) {
-                      final staffId = _staffNames.keys.elementAt(index);
-                      final staffName = _staffNames[staffId]!;
+                      final staffMember = _schedulingService.staff[index];
+                      final staffId = staffMember.id;
+                      final staffName = staffMember.name;
                       final blocks = _staffSchedules[staffId] ?? [];
                       
                       return _buildStaffCard(staffId, staffName, blocks);
@@ -5750,152 +4339,75 @@ class _StaffSchedulesViewPageState extends State<StaffSchedulesViewPage> {
   }
 
   Widget _buildLegendItem(Color bgColor, Color borderColor, String label) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 20,
-          height: 20,
-          decoration: BoxDecoration(
-            color: bgColor,
-            border: Border.all(color: borderColor, width: 2),
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12),
-        ),
-      ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(12)),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [Container(width: 8, height: 8, decoration: BoxDecoration(color: borderColor, shape: BoxShape.circle)), const SizedBox(width: 6), Text(label, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800))]),
     );
   }
 
   Widget _buildStaffCard(String staffId, String staffName, List<ScheduleBlock> blocks) {
-    final staffColor = _staffColors[staffId] ?? Colors.grey;
-    final staffIcon = _staffIcons[staffId] ?? Icons.person;
-    final nextAvailable = _getNextAvailableTime(staffId);
+    final staffColor = _staffColors[staffId] ?? AppColors.primary;
+    final staffIcon = _staffIcons[staffId] ?? Icons.person_rounded;
+    final availableCount = blocks.where((b) => b.isAvailable).length;
+    final occupiedCount = blocks.where((b) => b.isDuringBusinessHours && !b.isAvailable).length;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-
-          Container(
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: staffColor.withOpacity(0.1),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: staffColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    staffIcon,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(width: 15),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        staffName,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        nextAvailable,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(15),
-            child: GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                mainAxisSpacing: 8,
-                crossAxisSpacing: 8,
-                childAspectRatio: 1.5,
-              ),
-              itemCount: blocks.length,
-              itemBuilder: (context, index) {
-                return _buildTimeSlot(blocks[index]);
-              },
-            ),
-          ),
-        ],
-      ),
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.border)),
+      child: Column(children: [
+        Container(
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(gradient: LinearGradient(colors: [staffColor.withValues(alpha: 0.16), Colors.white], begin: Alignment.topLeft, end: Alignment.bottomRight), borderRadius: const BorderRadius.vertical(top: Radius.circular(22))),
+          child: Row(children: [
+            Container(width: 48, height: 48, decoration: BoxDecoration(color: staffColor, borderRadius: BorderRadius.circular(16)), child: Icon(staffIcon, color: Colors.white, size: 23)),
+            const SizedBox(width: 11),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(staffName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900)), const SizedBox(height: 3), Text(_getNextAvailableTime(staffId), style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary))])),
+            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [_miniMetric('$availableCount', 'free', AppColors.success), const SizedBox(height: 4), _miniMetric('$occupiedCount', 'occupied', AppColors.danger)]),
+          ]),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(13, 13, 13, 15),
+          child: LayoutBuilder(builder: (context, constraints) {
+            final count = constraints.maxWidth >= 650 ? 5 : constraints.maxWidth >= 480 ? 4 : constraints.maxWidth >= 340 ? 3 : 2;
+            return GridView.builder(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: count, mainAxisSpacing: 8, crossAxisSpacing: 8, childAspectRatio: 1.6), itemCount: blocks.length, itemBuilder: (context, index) => _buildTimeSlot(blocks[index]));
+          }),
+        ),
+      ]),
     );
   }
 
+  Widget _miniMetric(String value, String label, Color color) {
+    return Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5), decoration: BoxDecoration(color: color.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(10)), child: Text('$value $label', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: color)));
+  }
+
   Widget _buildTimeSlot(ScheduleBlock block) {
-    Color bgColor;
-    Color borderColor;
-    Color textColor;
-    
+    late final Color background;
+    late final Color foreground;
+    late final String label;
+
     if (!block.isDuringBusinessHours) {
-      bgColor = Colors.grey[200]!;
-      borderColor = Colors.grey[400]!;
-      textColor = Colors.grey[600]!;
+      background = const Color(0xFFF1EEEC);
+      foreground = AppColors.textSecondary;
+      label = 'Closed';
     } else if (block.isAvailable) {
-      bgColor = Colors.green[100]!;
-      borderColor = Colors.green;
-      textColor = Colors.green[900]!;
+      background = const Color(0xFFE8F7EE);
+      foreground = AppColors.success;
+      label = 'Available';
     } else {
-      bgColor = Colors.red[100]!;
-      borderColor = Colors.red;
-      textColor = Colors.red[900]!;
+      background = const Color(0xFFFCE8EC);
+      foreground = AppColors.danger;
+      label = 'Occupied';
     }
 
     return Container(
-      decoration: BoxDecoration(
-        color: bgColor,
-        border: Border.all(color: borderColor, width: 2),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Center(
-        child: Text(
-          TimeOfDay.fromDateTime(block.startTime).format(context),
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-            color: textColor,
-          ),
-        ),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 7),
+      decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(13), border: Border.all(color: foreground.withValues(alpha: 0.14))),
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        FittedBox(fit: BoxFit.scaleDown, child: Text(TimeOfDay.fromDateTime(block.startTime).format(context), style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w900, color: AppColors.textPrimary))),
+        const SizedBox(height: 4),
+        FittedBox(fit: BoxFit.scaleDown, child: Text(label.toUpperCase(), style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.w900, color: foreground, letterSpacing: 0.3))),
+      ]),
     );
   }
 }

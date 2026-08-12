@@ -48,7 +48,7 @@ class AuthService {
     String? address,
   }) async {
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -85,9 +85,9 @@ class AuthService {
   // Get User Data
   Future<Map<String, dynamic>?> getUserData() async {
     try {
-      User? user = _auth.currentUser;
+      final User? user = _auth.currentUser;
       if (user != null) {
-        DocumentSnapshot doc = await _firestore.collection('users').doc(user.uid).get();
+        final DocumentSnapshot doc = await _firestore.collection('users').doc(user.uid).get();
         return doc.data() as Map<String, dynamic>?;
       }
       return null;

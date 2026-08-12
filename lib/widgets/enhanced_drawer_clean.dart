@@ -1,15 +1,13 @@
+import '../theme/app_theme.dart';
 // ============================================================================
 // FILE: lib/widgets/enhanced_drawer_clean.dart
 // Copy-paste this ENTIRE file into your project
 // ============================================================================
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../providers/scheduling_provider.dart';
-import '../models/scheduling_models.dart';
 import '../main.dart'; // For HomePage
+import '../pages/my_appointments_page.dart';
 
 // ============================================================================
 // 1. ENHANCED DRAWER CLEAN
@@ -29,7 +27,7 @@ class EnhancedDrawerClean extends StatelessWidget {
     return Drawer(
       width: 280,
       child: Container(
-        color: const Color(0xFFD3CBBB),
+        color: AppColors.surfaceAlt,
         child: Column(
           children: [
             // User Profile Header
@@ -42,7 +40,7 @@ class EnhancedDrawerClean extends StatelessWidget {
                 right: 20,
               ),
               decoration: const BoxDecoration(
-                color: Color(0xFF8B0000),
+                color: AppColors.primary,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,7 +49,7 @@ class EnhancedDrawerClean extends StatelessWidget {
                     width: 60,
                     height: 60,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: Colors.white,
@@ -99,7 +97,7 @@ class EnhancedDrawerClean extends StatelessWidget {
                     ListTile(
                       leading: const Icon(
                         Icons.calendar_today,
-                        color: Color(0xFF8B0000),
+                        color: AppColors.primary,
                         size: 24,
                       ),
                       title: const Text(
@@ -111,7 +109,12 @@ class EnhancedDrawerClean extends StatelessWidget {
                       ),
                       onTap: () {
                         Navigator.pop(context);
-                        // TODO: Navigate to appointments page
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MyAppointmentsPage(),
+                          ),
+                        );
                       },
                     ),
 
@@ -119,7 +122,7 @@ class EnhancedDrawerClean extends StatelessWidget {
                     ListTile(
                       leading: const Icon(
                         Icons.person,
-                        color: Color(0xFF8B0000),
+                        color: AppColors.primary,
                         size: 24,
                       ),
                       title: const Text(
@@ -131,7 +134,12 @@ class EnhancedDrawerClean extends StatelessWidget {
                       ),
                       onTap: () {
                         Navigator.pop(context);
-                        // TODO: Navigate to profile page
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ProfileSettingsPage(),
+                          ),
+                        );
                       },
                     ),
 
@@ -139,7 +147,7 @@ class EnhancedDrawerClean extends StatelessWidget {
                     ListTile(
                       leading: const Icon(
                         Icons.schedule,
-                        color: Color(0xFF8B0000),
+                        color: AppColors.primary,
                         size: 24,
                       ),
                       title: const Text(
@@ -154,10 +162,7 @@ class EnhancedDrawerClean extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ChangeNotifierProvider(
-                              create: (_) => SchedulingProvider(),
-                              child: const StaffScheduleViewerPage(),
-                            ),
+                            builder: (_) => const StaffSchedulesViewPage(),
                           ),
                         );
                       },
@@ -216,279 +221,3 @@ class EnhancedDrawerClean extends StatelessWidget {
 // ============================================================================
 // 2. STAFF SCHEDULE VIEWER PAGE (Different name to avoid conflict!)
 // ============================================================================
-class StaffScheduleViewerPage extends StatefulWidget {
-  const StaffScheduleViewerPage({super.key});
-
-  @override
-  State<StaffScheduleViewerPage> createState() => _StaffScheduleViewerPageState();
-}
-
-class _StaffScheduleViewerPageState extends State<StaffScheduleViewerPage> {
-  DateTime _selectedDate = DateTime.now();
-
-  Future<void> _selectDate(BuildContext context) async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 90)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFF8B0000),
-              onPrimary: Colors.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFFF8DC),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFBEB5A8),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Staff Schedule',
-          style: TextStyle(
-            color: Color(0xFF8B0000),
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      body: Consumer<SchedulingProvider>(
-        builder: (context, provider, _) {
-          return StreamBuilder<List<Appointment>>(
-            stream: provider.service.getAppointmentsStream(_selectedDate),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                provider.updateAppointments(snapshot.data!);
-              }
-
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(
-                    color: Color(0xFF8B0000),
-                    strokeWidth: 3,
-                  ),
-                );
-              }
-
-              final slots =
-                  provider.service.generateTimeSlots(_selectedDate);
-
-              return Column(
-                children: [
-                  // Date Selector
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-                    color: Colors.white,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Select Date',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.black54,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              DateFormat('EEEE, MMM d, yyyy')
-                                  .format(_selectedDate),
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ],
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: () => _selectDate(context),
-                          icon: const Icon(Icons.calendar_today, size: 18),
-                          label: const Text('Change Date'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF8B0000),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            elevation: 2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Scheduling Grid
-                  Expanded(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Header Row
-                                Row(
-                                  children: [
-                                    _buildHeaderCell('Staff',
-                                        isCorner: true),
-                                    ...slots.map((slot) =>
-                                        _buildHeaderCell(slot.displayTime)),
-                                  ],
-                                ),
-
-                                // Staff Rows
-                                ...provider.service.staff.map((staff) {
-                                  return Row(
-                                    children: [
-                                      _buildStaffNameCell(staff.name),
-                                      ...slots.map((slot) {
-                                        final isAvailable = provider
-                                            .isSlotAvailable(staff.id, slot);
-                                        return _buildSlotCell(isAvailable);
-                                      }),
-                                    ],
-                                  );
-                                }),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildHeaderCell(String text, {bool isCorner = false}) {
-    return Container(
-      width: isCorner ? 100 : 75,
-      height: 48,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF8B0000), Color(0xFFB22222)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        border: Border.all(color: Colors.white, width: 1),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 11,
-        ),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
-  Widget _buildStaffNameCell(String name) {
-    return Container(
-      width: 100,
-      height: 56,
-      decoration: BoxDecoration(
-        color: const Color(0xFFE8DCC8),
-        border: Border.all(color: Colors.white, width: 1),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        name,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 13,
-          color: Colors.black87,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSlotCell(bool isAvailable) {
-    return Container(
-      width: 75,
-      height: 56,
-      decoration: BoxDecoration(
-        color: isAvailable
-            ? const Color(0xFFE8F5E9)
-            : const Color(0xFFFFCDD2),
-        border: Border.all(
-          color: Colors.white,
-          width: 1,
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            isAvailable ? Icons.check_circle : Icons.cancel,
-            color: isAvailable
-                ? const Color(0xFF4CAF50)
-                : const Color(0xFFD32F2F),
-            size: 22,
-          ),
-          const SizedBox(height: 3),
-          Text(
-            isAvailable ? 'Free' : 'Booked',
-            style: TextStyle(
-              fontSize: 8,
-              fontWeight: FontWeight.bold,
-              color: isAvailable
-                  ? const Color(0xFF2E7D32)
-                  : const Color(0xFFC62828),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

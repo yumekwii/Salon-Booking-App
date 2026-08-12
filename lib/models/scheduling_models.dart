@@ -8,7 +8,13 @@ class StaffMember {
   final String id;
   final String name;
   
-  StaffMember({required this.id, required this.name});
+  const StaffMember({required this.id, required this.name});
+
+  static const List<StaffMember> defaults = [
+    StaffMember(id: 'staff_1', name: 'Alice'),
+    StaffMember(id: 'staff_2', name: 'Bob'),
+    StaffMember(id: 'staff_3', name: 'Charlie'),
+  ];
   
   // In production, you can add fromFirestore if staff are stored in database
   factory StaffMember.fromFirestore(DocumentSnapshot doc) {
@@ -27,7 +33,7 @@ class TimeSlot {
   final TimeOfDay time;
   final DateTime dateTime;
   
-  TimeSlot({required this.time, required this.dateTime});
+  const TimeSlot({required this.time, required this.dateTime});
   
   // Display format: "09:00", "09:30", etc.
   String get displayTime => 
@@ -46,7 +52,7 @@ class Appointment {
   final String customerId;
   final String status; // 'confirmed', 'pending', 'cancelled'
   
-  Appointment({
+  const Appointment({
     required this.id,
     required this.staffId,
     required this.startTime,
@@ -90,7 +96,7 @@ class ScheduleBlock {
   final bool isAvailable;
   final bool isDuringBusinessHours;
   
-  ScheduleBlock({
+  const ScheduleBlock({
     required this.startTime,
     required this.endTime,
     required this.isAvailable,

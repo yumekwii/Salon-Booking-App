@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import '../models/scheduling_models.dart';
+import '../theme/app_theme.dart';
 
 class MyAppointmentsPage extends StatefulWidget {
   const MyAppointmentsPage({super.key});
@@ -28,12 +30,10 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> with SingleTick
   }
 
   String _getStaffName(String staffId) {
-    final staffMap = {
-      'staff_1': 'Alice',
-      'staff_2': 'Bob',
-      'staff_3': 'Charlie',
-    };
-    return staffMap[staffId] ?? 'Staff';
+    for (final staff in StaffMember.defaults) {
+      if (staff.id == staffId) return staff.name;
+    }
+    return 'Staff';
   }
 
   String _formatDuration(String duration) {
@@ -43,7 +43,7 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> with SingleTick
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'confirmed':
-        return const Color(0xFF4CAF50);
+        return AppColors.success;
       case 'pending':
         return const Color(0xFFFFA726);
       case 'completed':
@@ -73,38 +73,52 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> with SingleTick
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8DC),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFBEB5A8),
-        elevation: 0,
+        backgroundColor: AppColors.background,
+        title: const Text('My Appointments'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          tooltip: 'Back',
+          icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'My Appointments & History',
-          style: TextStyle(
-            color: Color(0xFF8B0000),
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(54),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+            child: Container(
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceMuted,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: TabBar(
+                controller: _tabController,
+                dividerColor: Colors.transparent,
+                indicator: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                indicatorSize: TabBarIndicatorSize.tab,
+                labelColor: AppColors.primary,
+                unselectedLabelColor: AppColors.textSecondary,
+                labelStyle: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w900),
+                tabs: const [
+                  Tab(text: 'All'),
+                  Tab(text: 'Upcoming'),
+                  Tab(text: 'Done'),
+                  Tab(text: 'Cancelled'),
+                ],
+              ),
+            ),
           ),
-        ),
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: const Color(0xFF8B0000),
-          labelColor: const Color(0xFF8B0000),
-          unselectedLabelColor: Colors.black54,
-          isScrollable: true,
-          labelStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-          tabs: const [
-            Tab(text: 'All'),
-            Tab(text: 'Upcoming'),
-            Tab(text: 'Completed'),
-            Tab(text: 'Cancelled'),
-          ],
         ),
       ),
       body: TabBarView(
@@ -136,7 +150,7 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> with SingleTick
         if (bookingsSnapshot.connectionState == ConnectionState.waiting) {
           return const Center(
             child: CircularProgressIndicator(
-              color: Color(0xFF8B0000),
+              color: AppColors.primary,
             ),
           );
         }
@@ -281,134 +295,86 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> with SingleTick
 
   Widget _buildStatisticsCard(int totalBookings, int totalSpent) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(15, 15, 15, 0),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.fromLTRB(15, 15, 15, 2),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF8B0000), Color(0xFFB22222)],
+          colors: [Color(0xFF6D3346), Color(0xFF8B5A6A)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(22),
       ),
       child: Row(
         children: [
-          Expanded(
-            child: Column(
-              children: [
-                const Icon(Icons.event_note, color: Colors.white, size: 32),
-                const SizedBox(height: 8),
-                Text(
-                  '$totalBookings',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Total Bookings',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 13,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-          Container(
-            width: 1,
-            height: 60,
-            color: Colors.white30,
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                const Icon(Icons.payments, color: Colors.white, size: 32),
-                const SizedBox(height: 8),
-                Text(
-                  '₱$totalSpent',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Total Spent',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 13,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
+          Expanded(child: _statTile(Icons.event_available_rounded, '$totalBookings', 'Bookings')),
+          Container(width: 1, height: 54, color: Colors.white24),
+          Expanded(child: _statTile(Icons.account_balance_wallet_rounded, '₱$totalSpent', 'Total spent')),
         ],
       ),
     );
   }
 
+  Widget _statTile(IconData icon, String value, String label) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.white70, size: 19),
+        const SizedBox(height: 6),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(value, style: const TextStyle(color: Colors.white, fontSize: 25, fontWeight: FontWeight.w900)),
+        ),
+        const SizedBox(height: 2),
+        Text(label, style: const TextStyle(color: Colors.white70, fontSize: 10.5, fontWeight: FontWeight.w700)),
+      ],
+    );
+  }
+
   Widget _buildEmptyState(String type) {
     String message;
+    String subtitle;
     IconData icon;
 
     switch (type) {
-      case 'all':
-        message = 'No bookings yet';
-        icon = Icons.event_note;
-        break;
       case 'upcoming':
-        message = 'No upcoming appointments';
-        icon = Icons.event_available;
+        message = 'Nothing scheduled yet';
+        subtitle = 'Your next salon appointment will appear here.';
+        icon = Icons.calendar_today_rounded;
         break;
       case 'completed':
-        message = 'No completed appointments';
-        icon = Icons.history;
+        message = 'No completed visits yet';
+        subtitle = 'Your salon history will build up here.';
+        icon = Icons.auto_awesome_rounded;
         break;
       case 'cancelled':
-        message = 'No cancelled appointments';
-        icon = Icons.event_busy;
+        message = 'No cancelled bookings';
+        subtitle = 'Cancelled appointments will appear here.';
+        icon = Icons.event_busy_rounded;
         break;
       default:
-        message = 'No appointments found';
-        icon = Icons.event_note;
+        message = 'No bookings yet';
+        subtitle = 'Book a service and it will show up here.';
+        icon = Icons.calendar_month_rounded;
     }
 
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 80, color: Colors.grey[400]),
-          const SizedBox(height: 20),
-          Text(
-            message,
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 76,
+              height: 76,
+              decoration: const BoxDecoration(color: AppColors.selectedBackground, shape: BoxShape.circle),
+              child: Icon(icon, size: 34, color: AppColors.primary),
             ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            type == 'upcoming' || type == 'all' ? 'Book a service to get started!' : '',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            Text(message, textAlign: TextAlign.center, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+            const SizedBox(height: 6),
+            Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
+          ],
+        ),
       ),
     );
   }
@@ -437,15 +403,16 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> with SingleTick
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 15),
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+            color: Colors.black.withValues(alpha: 0.035),
+            blurRadius: 18,
+            offset: const Offset(0, 7),
           ),
         ],
       ),
@@ -454,7 +421,7 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> with SingleTick
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
             decoration: BoxDecoration(
-              color: _getStatusColor(status).withOpacity(0.1),
+              color: _getStatusColor(status).withValues(alpha: 0.1),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
             ),
             child: Row(
@@ -500,15 +467,15 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> with SingleTick
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE8F5E9),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFF4CAF50).withOpacity(0.3)),
+                      color: const Color(0xFFEFF8F2),
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: AppColors.success.withValues(alpha: 0.20)),
                     ),
                     child: Row(
                       children: [
                         const Icon(
                           Icons.calendar_today,
-                          color: Color(0xFF4CAF50),
+                          color: AppColors.success,
                           size: 20,
                         ),
                         const SizedBox(width: 12),
@@ -563,7 +530,7 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> with SingleTick
                     decoration: BoxDecoration(
                       color: Colors.orange[50],
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                      border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       children: [
@@ -587,14 +554,14 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> with SingleTick
 
                 const Row(
                   children: [
-                    Icon(Icons.spa, color: Color(0xFF8B0000), size: 18),
+                    Icon(Icons.spa, color: AppColors.primary, size: 18),
                     SizedBox(width: 8),
                     Text(
                       'Services',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF8B0000),
+                        color: AppColors.primary,
                       ),
                     ),
                   ],
@@ -609,7 +576,7 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> with SingleTick
                         width: 4,
                         height: 35,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF8B0000),
+                          color: AppColors.primary,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -658,7 +625,7 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> with SingleTick
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF8B0000),
+                          color: AppColors.primary,
                         ),
                       ),
                     ],
@@ -716,7 +683,7 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> with SingleTick
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF8B0000),
+                            color: AppColors.primary,
                           ),
                         ),
                       ],
@@ -737,8 +704,8 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> with SingleTick
                           icon: const Icon(Icons.info_outline, size: 18),
                           label: const Text('Details'),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF8B0000),
-                            side: const BorderSide(color: Color(0xFF8B0000)),
+                            foregroundColor: AppColors.primary,
+                            side: const BorderSide(color: AppColors.primary),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -773,8 +740,8 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> with SingleTick
                       icon: const Icon(Icons.info_outline, size: 18),
                       label: const Text('View Details'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF8B0000),
-                        side: const BorderSide(color: Color(0xFF8B0000)),
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -791,86 +758,270 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> with SingleTick
     );
   }
 
-  void _showAppointmentDetails(String bookingId, Map<String, dynamic> bookingData, Map<String, dynamic>? appointmentData) {
-    showDialog(
+  void _showAppointmentDetails(
+    String bookingId,
+    Map<String, dynamic> bookingData,
+    Map<String, dynamic>? appointmentData,
+  ) {
+    final status = bookingData['status']?.toString().toUpperCase() ?? 'N/A';
+    final total = bookingData['totalAmount']?.toString() ?? '0';
+    final duration = bookingData['totalDuration']?.toString() ?? '0';
+    final payment = bookingData['paymentMethod']?.toString() ?? 'N/A';
+    final shortId = bookingId.length > 8 ? bookingId.substring(0, 8) : bookingId;
+    final start = appointmentData?['startTime'] is Timestamp
+        ? (appointmentData!['startTime'] as Timestamp).toDate()
+        : null;
+    final staff = appointmentData == null
+        ? '—'
+        : _getStaffName(appointmentData['staffId']?.toString() ?? '');
+    final services = bookingData['services'] is List
+        ? List<Map<String, dynamic>>.from(
+            (bookingData['services'] as List).map((e) => Map<String, dynamic>.from(e as Map)),
+          )
+        : <Map<String, dynamic>>[];
+
+    showGeneralDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFFD3CBBB),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: const Text(
-            'Appointment Details',
-            style: TextStyle(
-              color: Color(0xFF8B0000),
-              fontWeight: FontWeight.bold,
-              fontSize: 22,
-            ),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildDetailRow('Booking ID', '#${bookingId.substring(0, 8)}'),
-                _buildDetailRow('Status', bookingData['status']?.toString().toUpperCase() ?? 'N/A'),
-                const Divider(height: 20),
-                if (appointmentData != null) ...[
-                  _buildDetailRow('Date', DateFormat('MMMM d, yyyy').format((appointmentData['startTime'] as Timestamp).toDate())),
-                  _buildDetailRow('Time', DateFormat('h:mm a').format((appointmentData['startTime'] as Timestamp).toDate())),
-                  _buildDetailRow('Staff', _getStaffName(appointmentData['staffId'] ?? '')),
-                  const Divider(height: 20),
-                ],
-                _buildDetailRow('Total Duration', '${bookingData['totalDuration']} minutes'),
-                _buildDetailRow('Payment', bookingData['paymentMethod'] ?? 'N/A'),
-                _buildDetailRow('Amount', '₱${bookingData['totalAmount']}'),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'Close',
-                style: TextStyle(
-                  color: Color(0xFF8B0000),
-                  fontWeight: FontWeight.bold,
+      barrierDismissible: true,
+      barrierLabel: 'Appointment details',
+      barrierColor: Colors.black.withValues(alpha: 0.58),
+      transitionDuration: const Duration(milliseconds: 260),
+      pageBuilder: (dialogContext, _, _) {
+        return SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 520, maxHeight: 700),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.18),
+                        blurRadius: 35,
+                        offset: const Offset(0, 18),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.fromLTRB(20, 16, 14, 16),
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [AppColors.primaryDark, AppColors.primary],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 46,
+                              height: 46,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.13),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Icon(Icons.receipt_long_rounded, color: Colors.white),
+                            ),
+                            const SizedBox(width: 12),
+                            const Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Booking invoice', style: TextStyle(color: Colors.white70, fontSize: 11.5, fontWeight: FontWeight.w700)),
+                                  SizedBox(height: 2),
+                                  Text('Appointment details', style: TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w900)),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: 'Close',
+                              onPressed: () => Navigator.pop(dialogContext),
+                              icon: const Icon(Icons.close_rounded, color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Flexible(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.fromLTRB(18, 18, 18, 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  _invoiceStatus(status),
+                                  Text(
+                                    '#$shortId',
+                                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w800),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+                              Container(
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: AppColors.background,
+                                  borderRadius: BorderRadius.circular(18),
+                                  border: Border.all(color: AppColors.border),
+                                ),
+                                child: Row(
+                                  children: [
+                                    _invoiceMiniInfo(Icons.calendar_month_rounded, start == null ? 'Date' : DateFormat('EEE, MMM d').format(start)),
+                                    const SizedBox(width: 10),
+                                    _invoiceMiniInfo(Icons.schedule_rounded, start == null ? 'Time' : DateFormat('h:mm a').format(start)),
+                                    const SizedBox(width: 10),
+                                    _invoiceMiniInfo(Icons.person_rounded, staff),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 18),
+                              const Text('Services', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                              const SizedBox(height: 8),
+                              if (services.isEmpty)
+                                const Text('No service details recorded.', style: TextStyle(color: AppColors.textSecondary))
+                              else
+                                ...services.map((service) {
+                                  final name = service['name']?.toString() ?? 'Service';
+                                  final cat = service['category']?.toString() ?? '';
+                                  final price = service['price']?.toString() ?? '0';
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 8),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(color: AppColors.border),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 34,
+                                          height: 34,
+                                          decoration: BoxDecoration(
+                                            color: AppColors.selectedBackground,
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          child: const Icon(Icons.auto_awesome_rounded, color: AppColors.primary, size: 18),
+                                        ),
+                                        const SizedBox(width: 9),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(name, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w900)),
+                                              if (cat.isNotEmpty)
+                                                Text(cat, style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+                                            ],
+                                          ),
+                                        ),
+                                        Text('₱$price', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.primary)),
+                                      ],
+                                    ),
+                                  );
+                                }),
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryDark,
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                                child: Column(
+                                  children: [
+                                    _invoiceTotalRow('Duration', '$duration minutes', false),
+                                    const SizedBox(height: 8),
+                                    _invoiceTotalRow('Payment', payment, false),
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 10),
+                                      child: Divider(color: Colors.white24, height: 1),
+                                    ),
+                                    _invoiceTotalRow('Total paid', '₱$total', true),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton.icon(
+                            onPressed: () => Navigator.pop(dialogContext),
+                            icon: const Icon(Icons.done_rounded),
+                            label: const Text('Done'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ],
+          ),
+        );
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+        return FadeTransition(
+          opacity: curved,
+          child: ScaleTransition(scale: Tween<double>(begin: 0.96, end: 1).animate(curved), child: child),
         );
       },
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+  Widget _invoiceStatus(String status) {
+    final isCancelled = status == 'CANCELLED';
+    final color = isCancelled ? AppColors.danger : AppColors.success;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(999),
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.black54,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          Flexible(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.right,
-            ),
-          ),
+          Icon(isCancelled ? Icons.cancel_rounded : Icons.check_circle_rounded, color: color, size: 14),
+          const SizedBox(width: 5),
+          Text(status, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
         ],
       ),
+    );
+  }
+
+  Widget _invoiceMiniInfo(IconData icon, String value) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: AppColors.primary, size: 17),
+          const SizedBox(height: 6),
+          Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+        ],
+      ),
+    );
+  }
+
+  Widget _invoiceTotalRow(String label, String value, bool prominent) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: TextStyle(color: prominent ? Colors.white : Colors.white70, fontSize: prominent ? 14 : 11, fontWeight: prominent ? FontWeight.w900 : FontWeight.w700)),
+        Text(value, style: TextStyle(color: Colors.white, fontSize: prominent ? 22 : 12, fontWeight: FontWeight.w900)),
+      ],
     );
   }
 
@@ -879,14 +1030,14 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> with SingleTick
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFFD3CBBB),
+          backgroundColor: AppColors.surfaceAlt,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
           title: const Text(
             'Cancel Appointment?',
             style: TextStyle(
-              color: Color(0xFF8B0000),
+              color: AppColors.primary,
               fontWeight: FontWeight.bold,
             ),
           ),
