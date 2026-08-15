@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../theme/app_theme.dart';
 
 // =============================================================================
 // HOW TO WIRE THIS UP (read this first)
@@ -25,10 +24,23 @@ import '../theme/app_theme.dart';
 //      — no more passing a `services` list per page; the page pulls its
 //      own category's services out of the shared provider.
 //
+// Full example code for main.dart is in the chat message, not here.
 
 // =============================================================================
 // THEME — change primaryMaroon once here to re-theme the whole screen.
 // =============================================================================
+
+class ServiceAppColors {
+  ServiceAppColors._();
+
+  static const Color primaryMaroon = Color(0xFF800020);
+  static const Color background = Color(0xFFFFF8DC); // matches existing app bg
+  static const Color cardBackground = Colors.white;
+  static const Color selectedBackground = Color(0xFFF4E6EA); // subtle maroon tint
+  static const Color dialogBackground = Color(0xFFD3CBBB); // matches your existing dialogs
+  static const Color textPrimary = Color(0xFF2C2C2C);
+  static const Color textSecondary = Color(0xFF757575);
+}
 
 // =============================================================================
 // MODEL
@@ -222,210 +234,115 @@ class SalonServiceCard extends StatelessWidget {
     required this.onTap,
   });
 
-  bool get _isPopular => const {
-        'haircut_layered_cut',
-        'haircut_wolf_cut',
-        'treat_keratin',
-        'color_balayage',
-      }.contains(service.id);
-
   @override
   Widget build(BuildContext context) {
     final isSelected = service.isSelected;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: isSelected ? AppColors.primary : AppColors.border,
-              width: isSelected ? 2 : 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: isSelected ? 0.13 : 0.045),
-                blurRadius: isSelected ? 22 : 14,
-                offset: const Offset(0, 8),
-              ),
-            ],
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: isSelected ? ServiceAppColors.selectedBackground : ServiceAppColors.cardBackground,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? ServiceAppColors.primaryMaroon : Colors.transparent,
+            width: 2,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                flex: 6,
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(23)),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Image.asset(
-                        service.imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => const DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Color(0xFFE8D5C4), Color(0xFFF8EFEA)],
-                            ),
-                          ),
-                          child: Center(
-                            child: Icon(Icons.auto_awesome_rounded, color: AppColors.primary, size: 36),
-                          ),
-                        ),
-                      ),
-                      DecoratedBox(
-                        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        // Column + Expanded/Flexible everywhere below is what prevents
+        // RenderFlex overflow on smaller screens or long service names.
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              flex: 3,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.asset(
+                      service.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        decoration: const BoxDecoration(
                           gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Colors.transparent, Colors.black.withValues(alpha: 0.35)],
+                            colors: [Color(0xFFE8D5C4), Color(0xFFF5E6D3)],
                           ),
                         ),
-                      ),
-                      Positioned(
-                        left: 10,
-                        top: 10,
-                        child: Wrap(
-                          spacing: 6,
-                          children: [
-                            _ImageBadge(label: service.category, icon: Icons.sell_outlined),
-                            if (_isPopular)
-                              const _ImageBadge(label: 'Popular', icon: Icons.local_fire_department_outlined),
-                          ],
+                        child: const Center(
+                          child: Icon(Icons.spa_outlined, color: Colors.white, size: 32),
                         ),
                       ),
+                    ),
+                    if (isSelected)
                       Positioned(
-                        right: 10,
-                        top: 10,
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: isSelected ? AppColors.primary : Colors.white.withValues(alpha: 0.92),
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: ServiceAppColors.primaryMaroon,
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
-                            isSelected ? Icons.check_rounded : Icons.add_rounded,
-                            color: isSelected ? Colors.white : AppColors.primary,
-                            size: 20,
-                          ),
+                          child: const Icon(Icons.check, color: Colors.white, size: 16),
                         ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
-              Expanded(
-                flex: 4,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(13, 12, 13, 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          service.name,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 14.5,
-                            height: 1.18,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.textPrimary,
-                          ),
+            ),
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        service.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                          color: ServiceAppColors.textPrimary,
+                          height: 1.2,
                         ),
                       ),
-                      const SizedBox(height: 7),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: AppColors.surfaceMuted,
-                              borderRadius: BorderRadius.circular(9),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.schedule_rounded, size: 13, color: AppColors.textSecondary),
-                                const SizedBox(width: 4),
-                                Text(
-                                  service.formattedDuration,
-                                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.textSecondary),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            service.formattedPrice,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w900,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      service.formattedDuration,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 11, color: ServiceAppColors.textSecondary),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      service.formattedPrice,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: ServiceAppColors.primaryMaroon,
                       ),
-                      const SizedBox(height: 7),
-                      Row(
-                        children: [
-                          Icon(
-                            isSelected ? Icons.check_circle_rounded : Icons.touch_app_rounded,
-                            size: 13,
-                            color: isSelected ? AppColors.success : AppColors.primaryLight,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            isSelected ? 'Selected' : 'Tap to view & add',
-                            style: TextStyle(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w800,
-                              color: isSelected ? AppColors.success : AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ),
-    );
-  }
-}
-
-class _ImageBadge extends StatelessWidget {
-  final String label;
-  final IconData icon;
-
-  const _ImageBadge({required this.label, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white24),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 11, color: Colors.white),
-          const SizedBox(width: 4),
-          Text(label, style: const TextStyle(color: Colors.white, fontSize: 9.5, fontWeight: FontWeight.w800)),
-        ],
       ),
     );
   }
@@ -495,11 +412,11 @@ class ServiceDetailsSheet extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppColors.surfaceAlt,
+        backgroundColor: ServiceAppColors.dialogBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         title: const Text(
           'Replace Service?',
-          style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+          style: TextStyle(color: ServiceAppColors.primaryMaroon, fontWeight: FontWeight.bold),
         ),
         content: Text(
           'You already picked "${existing.name}" for ${existing.category}.\n\n'
@@ -512,7 +429,7 @@ class ServiceDetailsSheet extends StatelessWidget {
             child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            style: ElevatedButton.styleFrom(backgroundColor: ServiceAppColors.primaryMaroon),
             onPressed: () {
               provider.selectService(service);
               Navigator.pop(dialogContext); // close confirm dialog
@@ -530,33 +447,26 @@ class ServiceDetailsSheet extends StatelessWidget {
     final provider = context.watch<ServiceSelectionProvider>();
     final isSelected = provider.isSelected(service.id);
 
-    return SafeArea(
-      top: false,
-      child: Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.sizeOf(context).height * 0.82,
-        ),
-        padding: EdgeInsets.only(
-          left: 20,
-          right: 20,
-          top: 8,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-        ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+    return Container(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 8,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Align(
             alignment: Alignment.centerRight,
             child: IconButton(
               onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.close, color: AppColors.textSecondary),
+              icon: const Icon(Icons.close, color: ServiceAppColors.textSecondary),
               splashRadius: 20,
             ),
           ),
@@ -586,16 +496,15 @@ class ServiceDetailsSheet extends StatelessWidget {
             style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: ServiceAppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          Row(
             children: [
-              _InfoChip(icon: Icons.access_time, label: service.formattedDuration),
-              _InfoChip(icon: Icons.payments_outlined, label: service.formattedPrice),
+              Flexible(child: _InfoChip(icon: Icons.access_time, label: service.formattedDuration)),
+              const SizedBox(width: 10),
+              Flexible(child: _InfoChip(icon: Icons.payments_outlined, label: service.formattedPrice)),
             ],
           ),
           const SizedBox(height: 26),
@@ -605,8 +514,8 @@ class ServiceDetailsSheet extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () => _handlePrimaryAction(context, provider),
               style: ElevatedButton.styleFrom(
-                backgroundColor: isSelected ? Colors.grey[200] : AppColors.primary,
-                foregroundColor: isSelected ? AppColors.textPrimary : Colors.white,
+                backgroundColor: isSelected ? Colors.grey[200] : ServiceAppColors.primaryMaroon,
+                foregroundColor: isSelected ? ServiceAppColors.textPrimary : Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
@@ -622,13 +531,11 @@ class ServiceDetailsSheet extends StatelessWidget {
               onPressed: () => Navigator.pop(context),
               child: const Text(
                 'Keep Browsing',
-                style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                style: TextStyle(color: ServiceAppColors.textSecondary, fontWeight: FontWeight.w500),
               ),
             ),
           ),
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }
@@ -645,13 +552,13 @@ class _InfoChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
+        color: ServiceAppColors.primaryMaroon.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: AppColors.primary),
+          Icon(icon, size: 16, color: ServiceAppColors.primaryMaroon),
           const SizedBox(width: 6),
           Flexible(
             child: Text(
@@ -660,7 +567,7 @@ class _InfoChip extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: AppColors.primary,
+                color: ServiceAppColors.primaryMaroon,
               ),
             ),
           ),
@@ -703,104 +610,66 @@ class SelectionSummaryBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       top: false,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final compact = constraints.maxWidth < 460;
-          return Container(
-            margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-            padding: EdgeInsets.fromLTRB(16, compact ? 14 : 18, 12, compact ? 14 : 18),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.28),
-                  blurRadius: 18,
-                  offset: const Offset(0, 8),
-                ),
-              ],
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+        padding: const EdgeInsets.fromLTRB(20, 14, 14, 14),
+        decoration: BoxDecoration(
+          color: ServiceAppColors.primaryMaroon,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: ServiceAppColors.primaryMaroon.withValues(alpha: 0.35),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
             ),
-            child: compact
-                ? Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '$serviceCount Service${serviceCount > 1 ? 's' : ''} • $_durationLabel',
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(color: Colors.white70, fontSize: 11.5),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              totalPriceFormatted,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      FilledButton(
-                        onPressed: onContinue,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: AppColors.primary,
-                          minimumSize: const Size(52, 48),
-                          padding: const EdgeInsets.symmetric(horizontal: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                        ),
-                        child: const Icon(Icons.arrow_forward_rounded, size: 20),
-                      ),
-                    ],
-                  )
-                : Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '$serviceCount Service${serviceCount > 1 ? 's' : ''} • $_durationLabel',
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(color: Colors.white70, fontSize: 12),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              totalPriceFormatted,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 19,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      FilledButton.icon(
-                        onPressed: onContinue,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: AppColors.primary,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
-                        ),
-                        icon: const Icon(Icons.calendar_month_rounded, size: 18),
-                        label: const Text('Select Schedule'),
-                      ),
-                    ],
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '$serviceCount Service${serviceCount > 1 ? 's' : ''} • $_durationLabel',
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
                   ),
-          );
-        },
+                  const SizedBox(height: 2),
+                  Text(
+                    totalPriceFormatted,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 19,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            ElevatedButton(
+              onPressed: onContinue,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: ServiceAppColors.primaryMaroon,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Select Schedule', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  SizedBox(width: 4),
+                  Icon(Icons.arrow_forward_rounded, size: 18),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -868,14 +737,14 @@ class ServiceSelectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: ServiceAppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: ServiceAppColors.background,
         elevation: 0,
-        foregroundColor: AppColors.textPrimary,
+        foregroundColor: ServiceAppColors.textPrimary,
         title: Text(
           categoryTitle,
-          style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          style: const TextStyle(fontWeight: FontWeight.bold, color: ServiceAppColors.textPrimary),
         ),
       ),
       body: Consumer<ServiceSelectionProvider>(
@@ -884,39 +753,30 @@ class ServiceSelectionPage extends StatelessWidget {
 
           return Stack(
             children: [
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final width = constraints.maxWidth;
-                  final columns = width < 420
-                      ? 2
-                      : width < 700
-                          ? 2
-                          : width < 1050
-                              ? 3
-                              : 4;
-                  final gap = width < 600 ? 10.0 : 14.0;
-                  final bottomPadding = provider.hasSelection ? 116.0 : 18.0;
-
-                  return GridView.builder(
-                    padding: EdgeInsets.fromLTRB(14, 10, 14, bottomPadding),
-                    physics: const BouncingScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: columns,
-                      mainAxisSpacing: gap,
-                      crossAxisSpacing: gap,
-                      childAspectRatio: width < 600 ? 0.78 : 0.86,
-                    ),
-                    itemCount: categoryServices.length,
-                    itemBuilder: (context, index) {
-                      final service = categoryServices[index];
-                      return SalonServiceCard(
-                        key: ValueKey(service.id),
-                        service: service,
-                        onTap: () => _openDetails(context, service, provider),
-                      );
-                    },
-                  );
-                },
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  14,
+                  10,
+                  14,
+                  provider.hasSelection ? 100 : 14,
+                ),
+                child: GridView.builder(
+                  physics: const BouncingScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 0.72,
+                  ),
+                  itemCount: categoryServices.length,
+                  itemBuilder: (context, index) {
+                    final service = categoryServices[index];
+                    return SalonServiceCard(
+                      service: service,
+                      onTap: () => _openDetails(context, service, provider),
+                    );
+                  },
+                ),
               ),
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 250),
